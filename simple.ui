@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>807</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>1181</width>
+      <height>741</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>14</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="title">
+     <string>USER'S CAMERA</string>
+    </property>
+    <widget class="QWidget" name="ImgWidget" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>891</width>
+       <height>651</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnCamera">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>690</y>
+       <width>201</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CAMERA</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnMain">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>30</y>
+       <width>261</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>MAIN</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnGame">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>100</y>
+       <width>261</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>GAME</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnChallenge">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>170</y>
+       <width>261</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CHALLENGE</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnUser">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>240</y>
+       <width>261</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>USER</string>
+     </property>
+    </widget>
+    <zorder>ImgWidget</zorder>
+    <zorder>btnCamera</zorder>
+    <zorder>btnCamera</zorder>
+    <zorder>btnMain</zorder>
+    <zorder>btnGame</zorder>
+    <zorder>btnChallenge</zorder>
+    <zorder>btnUser</zorder>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1200</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
