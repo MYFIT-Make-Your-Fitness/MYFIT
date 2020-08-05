@@ -13,7 +13,7 @@ form_2, base_2 = uic.loadUiType(uifile_2)
 uifile_3 = 'Sign.ui'
 form_3, base_3 = uic.loadUiType(uifile_3)
 
-uifile_4 = 'Main.ui'
+uifile_4 = 'simple.ui'
 form_4, base_4 = uic.loadUiType(uifile_4)
 
 class Start(base_1, form_1):
@@ -63,6 +63,7 @@ class MainPage(base_4, form_4):
     def __init__(self):
         super(base_4, self).__init__()
         self.setupUi(self)
+
 
 if __name__ == '__main__':
        app = QApplication(sys.argv)
