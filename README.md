@@ -1,2 +1,2 @@
-# GETY
-Security program using gesture recognition
+# MYFIT
+Make Your Fitness
