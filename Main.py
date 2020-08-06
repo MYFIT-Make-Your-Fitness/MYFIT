@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWidgets import QApplication, QWidget, QAction, qApp
 from PyQt5.QtGui import QIcon
 from PyQt5 import uic
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
@@ -114,10 +114,12 @@ class OwnImageWidget(QtWidgets.QWidget):
 
 class MainPage(QtWidgets.QMainWindow, form_4):
     def __init__(self, parent=None):
+
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setupUi(self)
 
         self.btnCamera.clicked.connect(self.start_clicked)
+        self.btnlog.clicked.connect(self.log_out)
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
@@ -126,6 +128,12 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
+
+
+    def log_out(self):
+        self.window = Start()
+        self.window.show()
+        self.close()
 
     def start_clicked(self):
         global running

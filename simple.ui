@@ -118,13 +118,19 @@
       <string>USER</string>
      </property>
     </widget>
-    <zorder>ImgWidget</zorder>
-    <zorder>btnCamera</zorder>
-    <zorder>btnCamera</zorder>
-    <zorder>btnMain</zorder>
-    <zorder>btnGame</zorder>
-    <zorder>btnChallenge</zorder>
-    <zorder>btnUser</zorder>
+    <widget class="QPushButton" name="btnlog">
+     <property name="geometry">
+      <rect>
+       <x>920</x>
+       <y>620</y>
+       <width>261</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>LOGOUT</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
