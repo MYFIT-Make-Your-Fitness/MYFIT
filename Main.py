@@ -167,7 +167,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.setupUi(self)
 
         self.btnCamera.clicked.connect(self.start_clicked)
-        self.btnlog.clicked.connect(self.log_out)
+        self.btnLogout.clicked.connect(self.log_out)
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
