@@ -118,7 +118,7 @@
       <string>USER</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btnlog">
+    <widget class="QPushButton" name="btnLogout">
      <property name="geometry">
       <rect>
        <x>920</x>
