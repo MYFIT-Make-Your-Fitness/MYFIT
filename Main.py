@@ -1,15 +1,16 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QAction, qApp
-from PyQt5.QtGui import QIcon
-from PyQt5 import uic
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
-import sys
-import cv2
-import numpy as np
-import threading
-import time
+import json
 import queue
-#load both ui file
+import sys
+import threading
+import urllib.request
+from collections import OrderedDict
+
+import cv2
+from PyQt5 import QtCore, QtGui, uic, QtWidgets
+from PyQt5.QtWidgets import QApplication, QAction, qApp
+
+
+# load both ui file
 uifile_1 = 'Start.ui'
 form_1, base_1 = uic.loadUiType(uifile_1)
 
@@ -22,68 +23,73 @@ form_3, base_3 = uic.loadUiType(uifile_3)
 uifile_4 = 'simple.ui'
 form_4, base_4 = uic.loadUiType(uifile_4)
 
+
 class Start(base_1, form_1):
-       def __init__(self):
-           super(base_1,self).__init__()
-           self.setupUi(self)
-           self.login.clicked.connect(self.change)
-           self.SignUp.clicked.connect(self.change_2)
-           self.Exit_button()
+    def __init__(self):
+        super(base_1, self).__init__()
+        self.setupUi(self)
+        self.login.clicked.connect(self.change)
+        self.SignUp.clicked.connect(self.change_2)
+        self.Exit_button()
 
-       def Exit_button(self):
-           exit = QAction('Exit', self)
-           exit.setShortcut('Ctrl+Q') #단축키 설정
-           exit.triggered.connect(qApp.quit) # quit() 메서드와 연결
+    def Exit_button(self):
+        exit = QAction('Exit', self)
+        exit.setShortcut('Ctrl+Q')  # 단축키 설정
+        exit.triggered.connect(qApp.quit)  # quit() 메서드와 연결
 
-           self.statusBar()
+        self.statusBar()
 
-           menu = self.menuBar() #메뉴바 생성
-           menu.setNativeMenuBar(False)
-           menubutton = menu.addMenu('&File')
-           menubutton.addAction(exit) #동작 추가
+        menu = self.menuBar()  # 메뉴바 생성
+        menu.setNativeMenuBar(False)
+        menubutton = menu.addMenu('&File')
+        menubutton.addAction(exit)  # 동작 추가
 
-           self.setWindowTitle('Menubar')
-           self.show()
+        self.setWindowTitle('Menubar')
+        self.show()
 
-       def change(self):
-           self.main = loginPage()
-           self.main.show()
-           self.close()
-       def change_2(self):
-           self.main=SignPage()
-           self.main.show()
-           self.close()
+    def change(self):
+        self.main = loginPage()
+        self.main.show()
+        self.close()
+
+    def change_2(self):
+        self.main = SignPage()
+        self.main.show()
+        self.close()
+
 
 class loginPage(base_2, form_2):
-       def __init__(self):
-           super(base_2, self).__init__()
-           self.setupUi(self)
-           self.Back.clicked.connect(self.change)
-           self.OK.clicked.connect(self.change_2)
-           self.Exit_button()
+    def __init__(self):
+        super(base_2, self).__init__()
+        self.setupUi(self)
+        self.Back.clicked.connect(self.change)
+        self.OK.clicked.connect(self.change_2)
+        self.Exit_button()
 
-       def Exit_button(self):
-           exit = QAction('Exit', self)
-           exit.setShortcut('Ctrl+Q') #단축키 설정
-           exit.triggered.connect(qApp.quit)
+    def Exit_button(self):
+        exit = QAction('Exit', self)
+        exit.setShortcut('Ctrl+Q')  # 단축키 설정
+        exit.triggered.connect(qApp.quit)
 
-           self.statusBar()
+        self.statusBar()
 
-           menu = self.menuBar()
-           menu.setNativeMenuBar(False)
-           menubutton = menu.addMenu('&File')
-           menubutton.addAction(exit)
+        menu = self.menuBar()
+        menu.setNativeMenuBar(False)
+        menubutton = menu.addMenu('&File')
+        menubutton.addAction(exit)
 
-           self.setWindowTitle('Menubar')
-           self.show()
-       def change(self):
-           self.window=Start()
-           self.window.show()
-           self.close()
-       def change_2(self):
-           self.window=MainPage()
-           self.window.show()
-           self.close()
+        self.setWindowTitle('Menubar')
+        self.show()
+
+    def change(self):
+        self.window = Start()
+        self.window.show()
+        self.close()
+
+    def change_2(self):
+        self.window = MainPage()
+        self.window.show()
+        self.close()
 
 
 class SignPage(base_3, form_3):
@@ -112,6 +118,7 @@ class SignPage(base_3, form_3):
         self.window = Start()
         self.window.show()
         self.close()
+
 
 running = False
 capture_thread = None
@@ -232,8 +239,8 @@ class MainPage(QtWidgets.QMainWindow, form_4):
 
 
 if __name__ == '__main__':
-       capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
-       app = QApplication(sys.argv)
-       ex = Start()
-       ex.show()
-       sys.exit(app.exec_())
+    capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
+    app = QApplication(sys.argv)
+    ex = Start()
+    ex.show()
+    sys.exit(app.exec_())
