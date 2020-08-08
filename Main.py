@@ -28,6 +28,22 @@ class Start(base_1, form_1):
            self.setupUi(self)
            self.login.clicked.connect(self.change)
            self.SignUp.clicked.connect(self.change_2)
+           self.Exit_button()
+
+       def Exit_button(self):
+           exit = QAction('Exit', self)
+           exit.setShortcut('Ctrl+Q') #단축키 설정
+           exit.triggered.connect(qApp.quit) # quit() 메서드와 연결
+
+           self.statusBar()
+
+           menu = self.menuBar() #메뉴바 생성
+           menu.setNativeMenuBar(False)
+           menubutton = menu.addMenu('&File')
+           menubutton.addAction(exit) #동작 추가
+
+           self.setWindowTitle('Menubar')
+           self.show()
 
        def change(self):
            self.main = loginPage()
@@ -44,6 +60,22 @@ class loginPage(base_2, form_2):
            self.setupUi(self)
            self.Back.clicked.connect(self.change)
            self.OK.clicked.connect(self.change_2)
+           self.Exit_button()
+
+       def Exit_button(self):
+           exit = QAction('Exit', self)
+           exit.setShortcut('Ctrl+Q') #단축키 설정
+           exit.triggered.connect(qApp.quit)
+
+           self.statusBar()
+
+           menu = self.menuBar()
+           menu.setNativeMenuBar(False)
+           menubutton = menu.addMenu('&File')
+           menubutton.addAction(exit)
+
+           self.setWindowTitle('Menubar')
+           self.show()
        def change(self):
            self.window=Start()
            self.window.show()
@@ -59,6 +91,22 @@ class SignPage(base_3, form_3):
         super(base_3, self).__init__()
         self.setupUi(self)
         self.Back.clicked.connect(self.change)
+        self.Exit_button()
+
+    def Exit_button(self):
+        exit = QAction('Exit', self)
+        exit.setShortcut('Ctrl+Q')
+        exit.triggered.connect(qApp.quit)
+
+        self.statusBar()
+
+        menu = self.menuBar()
+        menu.setNativeMenuBar(False)
+        menubutton = menu.addMenu('&File')
+        menubutton.addAction(exit)
+
+        self.setWindowTitle('Menubar')
+        self.show()
 
     def change(self):
         self.window = Start()
@@ -128,7 +176,22 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
+        self.Exit_button()
 
+    def Exit_button(self):
+        exit = QAction('Exit', self)
+        exit.setShortcut('Ctrl+Q')
+        exit.triggered.connect(qApp.quit)
+
+        self.statusBar()
+
+        menu = self.menuBar()
+        menu.setNativeMenuBar(False)
+        menubutton = menu.addMenu('&File')
+        menubutton.addAction(exit)
+
+        self.setWindowTitle('Menubar')
+        self.show()
 
     def log_out(self):
         self.window = Start()
