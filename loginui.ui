@@ -17,10 +17,10 @@
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="IdInput">
+   <widget class="QLineEdit" name="inputId">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>370</x>
       <y>190</y>
       <width>261</width>
       <height>41</height>
@@ -33,7 +33,7 @@
    <widget class="QLabel" name="ID">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>300</x>
       <y>190</y>
       <width>41</width>
       <height>51</height>
@@ -46,7 +46,7 @@
    <widget class="QLabel" name="PW">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>170</x>
       <y>270</y>
       <width>181</width>
       <height>31</height>
@@ -56,10 +56,10 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;PASSWORD&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="PwInput">
+   <widget class="QLineEdit" name="inputPw">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>370</x>
       <y>260</y>
       <width>261</width>
       <height>41</height>
@@ -69,12 +69,12 @@
      <string notr="true">background:rgb(255, 255, 255)</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="OK">
+   <widget class="QPushButton" name="btnLogin">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>350</y>
-      <width>111</width>
+      <x>230</x>
+      <y>360</y>
+      <width>125</width>
       <height>41</height>
      </rect>
     </property>
@@ -82,15 +82,15 @@
      <string notr="true">font: 25 18pt &quot;Adobe Ming Std L&quot;;</string>
     </property>
     <property name="text">
-     <string>OK</string>
+     <string>LOGIN</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Back">
+   <widget class="QPushButton" name="btnBack">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>350</y>
-      <width>111</width>
+      <x>460</x>
+      <y>360</y>
+      <width>125</width>
       <height>41</height>
      </rect>
     </property>
