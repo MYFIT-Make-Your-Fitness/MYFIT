@@ -11,7 +11,8 @@ from io import BytesIO
 
 import cv2
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtWidgets import QApplication, QAction, qApp
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
 # load both ui file
 uifile_1 = 'Start.ui'  # start
@@ -31,7 +32,7 @@ class Start(base_1, form_1):
     def __init__(self):
         super(base_1, self).__init__()
         self.setupUi(self)
-        removeLogfile('user.json')  # 남아있는 로그인 정보 파일 삭제
+        self.setWindowTitle('MYFIT START')
         self.login.clicked.connect(self.change)
         self.SignUp.clicked.connect(self.change_2)
         self.Exit_button()
@@ -40,15 +41,11 @@ class Start(base_1, form_1):
         exit = QAction('Exit', self)
         exit.setShortcut('Ctrl+Q')  # 단축키 설정
         exit.triggered.connect(qApp.quit)  # quit() 메서드와 연결
-
         self.statusBar()
-
         menu = self.menuBar()  # 메뉴바 생성
         menu.setNativeMenuBar(False)
         menubutton = menu.addMenu('&File')
         menubutton.addAction(exit)  # 동작 추가
-
-        self.setWindowTitle('Menubar')
         self.show()
 
     def change(self):
@@ -63,9 +60,13 @@ class Start(base_1, form_1):
 
 
 class loginPage(base_2, form_2):
+    userid = ''
+    username = ''
+
     def __init__(self):
         super(base_2, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle('MYFIT LOGIN')
         self.btnBack.clicked.connect(self.change)
         self.btnLogin.clicked.connect(self.login)
         self.Exit_button()
@@ -74,15 +75,11 @@ class loginPage(base_2, form_2):
         exit = QAction('Exit', self)
         exit.setShortcut('Ctrl+Q')  # 단축키 설정
         exit.triggered.connect(qApp.quit)
-
         self.statusBar()
-
         menu = self.menuBar()
         menu.setNativeMenuBar(False)
         menubutton = menu.addMenu('&File')
         menubutton.addAction(exit)
-
-        self.setWindowTitle('Menubar')
         self.show()
 
     def change(self):  # 시작화면으로 돌아가기
@@ -96,27 +93,20 @@ class loginPage(base_2, form_2):
         self.close()
 
     def login(self):  # 로그인
-        loginOk = 0  # 로그인 성공 여부
+        loginOk = False  # 로그인 성공 여부
         userid = self.inputId.text()
         userpw = self.inputPw.text()
-        username = ''
         if userid != '' and userpw != '':
-            serverData = readServerData("jsonTest")  # 서버 데이터 읽어옴
+            serverData = readServerData("users")  # 서버 데이터 읽어옴
             for i in serverData:
                 if serverData[i]['id'] == userid:  # check id
                     if serverData[i]['pw'] == userpw:  # check pw
-                        username = serverData[i]['name']
-                        loginOk = 1
+                        loginPage.userid = userid
+                        loginPage.username = serverData[i]['name']
+                        loginOk = True
                         break
 
         if loginOk:  # 로그인 성공
-            # Login 정보 파일로 저장
-            loginData = OrderedDict()
-            loginData['id'] = userid
-            loginData['name'] = username
-            with open('user.json', 'w', encoding='utf-8') as loginFile:
-                json.dump(loginData, loginFile, indent="\t")
-
             self.change_2()  # 메인 페이지로 이동
         else:  # 로그인 실패
             messageBox("로그인 실패", "ID 또는 PW가 틀렸습니다.", 0)
@@ -126,6 +116,7 @@ class SignPage(base_3, form_3):
     def __init__(self):
         super(base_3, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle('MYFIT SIGNUP')
         self.btnBack.clicked.connect(self.change)
         self.btnSignup.clicked.connect(self.signUp)
         self.Exit_button()
@@ -134,15 +125,11 @@ class SignPage(base_3, form_3):
         exit = QAction('Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.triggered.connect(qApp.quit)
-
         self.statusBar()
-
         menu = self.menuBar()
         menu.setNativeMenuBar(False)
         menubutton = menu.addMenu('&File')
         menubutton.addAction(exit)
-
-        self.setWindowTitle('Menubar')
         self.show()
 
     def change(self):
@@ -158,7 +145,7 @@ class SignPage(base_3, form_3):
         if userid == '' or userpw == '' or username == '':
             messageBox("경고", "ID, PASSWORD와 이름은 필수 항목입니다.", 0)
         else:
-            file_data = readServerData("jsonTest")
+            file_data = readServerData("users")
             count = 0
             for i in file_data:  # id 중복 검사
                 if file_data[i]['id'] == userid:  # check id
@@ -175,7 +162,7 @@ class SignPage(base_3, form_3):
                 file_data['t']['challenge'] = False  # default
                 file_data[userNum] = file_data.pop('t')  # user 번호 설정
 
-                upload(file_data, "jsonTest")  # 서버에 새로운 회원 정보 업로드
+                upload(file_data, "users")  # 서버에 새로운 회원 정보 업로드
                 i = messageBox("가입완료", "회원가입이 완료되었습니다.", 0)
                 if i == 1:
                     self.change()
@@ -189,7 +176,7 @@ def upload(file_data, fileName):
     tempF = json.dumps(file_data, indent="\t")
     tempF = bytes(tempF, "utf8")
     file_like = BytesIO(tempF)
-    ftp.storbinary('STOR jsonTest.json', file_like)
+    ftp.storbinary('STOR users.json', file_like)
 
 
 # server Data를 읽어옴
@@ -249,49 +236,83 @@ class OwnImageWidget(QtWidgets.QWidget):
 
 
 class MainPage(QtWidgets.QMainWindow, form_4):
+    userid = ''
+    username = ''
+
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setupUi(self)
+        self.setWindowTitle('MYFIT USER\'S PAGE')
 
         # login한 user의 이름 표시
-        loginData = OrderedDict()
-        with open('user.json', 'r', encoding='utf-8') as loginFile:
-            loginData = json.load(loginFile)
-        userid = loginData['id']
-        username = loginData['name']
-        self.loginName.setText(username)
+        MainPage.userid = loginPage.userid  # loginData['id']
+        MainPage.username = loginPage.username  # loginData['name']
+        self.loginName.setText(MainPage.username)
 
         self.btnCamera.clicked.connect(self.startCamera)
+        self.btnChallenge.clicked.connect(self.challenge)
+        self.btnTurn.clicked.connect(self.myTurn)
+        self.btnNext.clicked.connect(self.chooseNext)
         self.btnLogout.clicked.connect(self.logout)
+        self.groupBox_ch.hide()
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
         self.ImgWidget = OwnImageWidget(self.ImgWidget)
-
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
+
         self.Exit_button()
+        # TODO: 아래는 게임 버튼 눌렀을 때 적용
+        self.checkFirst()
 
     def Exit_button(self):
         exit = QAction('Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.triggered.connect(qApp.quit)
-
         self.statusBar()
-
         menu = self.menuBar()
         menu.setNativeMenuBar(False)
         menubutton = menu.addMenu('&File')
         menubutton.addAction(exit)
-
-        self.setWindowTitle('Menubar')
         self.show()
 
+    def checkFirst(self):
+        fileData = readServerData("users")
+        for i in fileData:  # id 중복 검사
+            if fileData[i]['id'] == loginPage.userid:
+                if fileData[i]['balance'] == 0:
+                    i = messageBox("자세 측정 필요", "최초 자세 측정 데이터가 필요합니다.", 0)
+                    break
+
+    # TODO: challengeBoard.json, users.json 연동 방법
+    def challenge(self):
+        self.groupBox.setTitle("            'S CHALLENGE BOARD")
+        self.groupBox_ch.show()
+        self.ImgWidget.hide()
+        self.btnCamera.setEnabled(False)
+
+        challengeData = readServerData('challengeBoard')
+
+        model = QStandardItemModel()
+        for c in challengeData:
+            model.appendRow(QStandardItem(challengeData[c]['id']))
+        self.listView.setModel(model)
+
+    # TODO: MAIN 버튼 클릭
+
+    # TODO: 내 차례 challenge 수행
+    def myTurn(self):
+        return 0
+
+    # TODO: 다음 차례 challenge 수행할 user 선택
+    def chooseNext(self):
+        return 0
+
     def logout(self):
-        removeLogfile('user.json')  # 로그아웃 시 로그인 정보 파일 삭제
-        self.window = Start()
-        self.window.show()
+        # self.window = Start()
+        # self.window.show()
         self.close()
 
     def startCamera(self):
@@ -300,6 +321,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         capture_thread.start()
         self.btnCamera.setEnabled(False)
         self.btnCamera.setText('Loading...')
+    # TODO: Camera OFF
 
     def update_frame(self):
         if not q.empty():
@@ -330,16 +352,14 @@ class MainPage(QtWidgets.QMainWindow, form_4):
 # 메시지박스(알림창) 함수
 def messageBox(title, text, style):
     return ctypes.windll.user32.MessageBoxW(None, text, title, style)
-
-
-# style 인자에 따라 생김새 지정 가능
-# 0: 확인(1)
-# 1: 확인(1), 취소(2)
-# 2: 중단(3), 다시시도(4), 무시(5)
-# 3: 예(6), 아니오(7), 취소(2)
-# 4: 예(6), 아니오(7)
-# 5: 다시시도(4), 취소(2)
-# 6: 취소(2), 다시시도(10), 계속(11)
+    # style 인자에 따라 생김새 지정 가능
+    # 0: 확인(1)
+    # 1: 확인(1), 취소(2)
+    # 2: 중단(3), 다시시도(4), 무시(5)
+    # 3: 예(6), 아니오(7), 취소(2)
+    # 4: 예(6), 아니오(7)
+    # 5: 다시시도(4), 취소(2)
+    # 6: 취소(2), 다시시도(10), 계속(11)
 
 
 # 로그인 정보 저장 파일 삭제 함수
@@ -354,7 +374,3 @@ if __name__ == '__main__':
     ex = Start()
     ex.show()
     sys.exit(app.exec_())
-    # TODO: x를 눌러서 프로그램이 종료될 때 로그인 정보 저장 파일 삭제
-    #       현재) 두가지 시점에서 파일 삭제 처리
-    #             1. 프로그램 시작 전
-    #             2. 로그아웃 버튼 클릭 시
