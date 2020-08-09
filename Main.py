@@ -31,6 +31,7 @@ class Start(base_1, form_1):
     def __init__(self):
         super(base_1, self).__init__()
         self.setupUi(self)
+        removeLogfile('user.json')  # 남아있는 로그인 정보 파일 삭제
         self.login.clicked.connect(self.change)
         self.SignUp.clicked.connect(self.change_2)
         self.Exit_button()
@@ -98,19 +99,24 @@ class loginPage(base_2, form_2):
         loginOk = 0  # 로그인 성공 여부
         userid = self.inputId.text()
         userpw = self.inputPw.text()
+        username = ''
         if userid != '' and userpw != '':
             serverData = readServerData("jsonTest")  # 서버 데이터 읽어옴
             for i in serverData:
-                if serverData[i]['id'] == userid: # check id
-                    if serverData[i]['pw'] == userpw: # check pw
-                        # username = serverData[i]['name']
+                if serverData[i]['id'] == userid:  # check id
+                    if serverData[i]['pw'] == userpw:  # check pw
+                        username = serverData[i]['name']
                         loginOk = 1
                         break
 
         if loginOk:  # 로그인 성공
-            # TODO : Login 정보 업로드 - 페이지 전환에 따라 저장된 전역변수값 전달X
-            #        1. Server에 로그인 정보 저장 - 다른 유저의 로그인 정보와 혼선 가능
-            #        2. 프로그램이 위치한 폴더에 text파일 생성 - 로그아웃 시 삭제 필요
+            # Login 정보 파일로 저장
+            loginData = OrderedDict()
+            loginData['id'] = userid
+            loginData['name'] = username
+            with open('user.json', 'w', encoding='utf-8') as loginFile:
+                json.dump(loginData, loginFile, indent="\t")
+
             self.change_2()  # 메인 페이지로 이동
         else:  # 로그인 실패
             messageBox("로그인 실패", "ID 또는 PW가 틀렸습니다.", 0)
@@ -153,14 +159,14 @@ class SignPage(base_3, form_3):
             messageBox("경고", "ID, PASSWORD와 이름은 필수 항목입니다.", 0)
         else:
             file_data = readServerData("jsonTest")
-            count=0
-            for i in file_data: #id 중복 검사
+            count = 0
+            for i in file_data:  # id 중복 검사
                 if file_data[i]['id'] == userid:  # check id
-                    count=1
+                    count = 1
                     messageBox("경고", "ID 중복", 0)
-            if count==0:
+            if count == 0:
                 userNum = 'user' + str(len(file_data))
-                file_data.setdefault('t', {})  # key값에 변수로는 왜 바로 안되는지 모르겠네
+                file_data.setdefault('t', {})  # key 값에 변수로는 왜 바로 안되는지 모르겠네
                 file_data['t']['id'] = userid
                 file_data['t']['pw'] = userpw
                 file_data['t']['name'] = username
@@ -177,7 +183,7 @@ class SignPage(base_3, form_3):
 
 # upload data file to server _ 서버에 업로드
 def upload(file_data, fileName):
-    os.system("wget http://soyeong99.dothome.co.kr/web/"+fileName+".json")
+    os.system("wget http://soyeong99.dothome.co.kr/web/" + fileName + ".json")
     ftp = FTP('112.175.184.79', 'soyeong99', 'thdud4869!')
     ftp.cwd("/html/web/")
     tempF = json.dumps(file_data, indent="\t")
@@ -189,7 +195,7 @@ def upload(file_data, fileName):
 # server Data를 읽어옴
 def readServerData(fileName):
     file_data = OrderedDict()
-    data = urllib.request.urlopen("http://soyeong99.dothome.co.kr/web/"+fileName+".json").read()
+    data = urllib.request.urlopen("http://soyeong99.dothome.co.kr/web/" + fileName + ".json").read()
     file_data = json.loads(data)
     return file_data
 
@@ -244,12 +250,17 @@ class OwnImageWidget(QtWidgets.QWidget):
 
 class MainPage(QtWidgets.QMainWindow, form_4):
     def __init__(self, parent=None):
-
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setupUi(self)
 
-        # TODO : login한 user의 이름 표시
-        # self.loginName.setText(logName)
+        # login한 user의 이름 표시
+        loginData = OrderedDict()
+        with open('user.json', 'r', encoding='utf-8') as loginFile:
+            loginData = json.load(loginFile)
+        userid = loginData['id']
+        username = loginData['name']
+        self.loginName.setText(username)
+
         self.btnCamera.clicked.connect(self.startCamera)
         self.btnLogout.clicked.connect(self.logout)
 
@@ -278,6 +289,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.show()
 
     def logout(self):
+        removeLogfile('user.json')  # 로그아웃 시 로그인 정보 파일 삭제
         self.window = Start()
         self.window.show()
         self.close()
@@ -329,9 +341,20 @@ def messageBox(title, text, style):
 # 5: 다시시도(4), 취소(2)
 # 6: 취소(2), 다시시도(10), 계속(11)
 
+
+# 로그인 정보 저장 파일 삭제 함수
+def removeLogfile(file):
+    if os.path.isfile(file):
+        os.remove(file)
+
+
 if __name__ == '__main__':
     capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
     app = QApplication(sys.argv)
     ex = Start()
     ex.show()
     sys.exit(app.exec_())
+    # TODO: x를 눌러서 프로그램이 종료될 때 로그인 정보 저장 파일 삭제
+    #       현재) 두가지 시점에서 파일 삭제 처리
+    #             1. 프로그램 시작 전
+    #             2. 로그아웃 버튼 클릭 시
