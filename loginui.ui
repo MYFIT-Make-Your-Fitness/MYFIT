@@ -68,6 +68,9 @@
     <property name="styleSheet">
      <string notr="true">background:rgb(255, 255, 255)</string>
     </property>
+    <property name="echoMode">
+     <enum>QLineEdit::Password</enum>
+    </property>
    </widget>
    <widget class="QPushButton" name="btnLogin">
     <property name="geometry">
