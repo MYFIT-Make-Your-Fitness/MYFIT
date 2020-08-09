@@ -153,22 +153,26 @@ class SignPage(base_3, form_3):
             messageBox("경고", "ID, PASSWORD와 이름은 필수 항목입니다.", 0)
         else:
             file_data = readServerData("jsonTest")
-            # TODO: id, pw, 이름 중복 검사 해주기
+            count=0
+            for i in file_data: #id 중복 검사
+                if file_data[i]['id'] == userid:  # check id
+                    count=1
+                    messageBox("경고", "ID 중복", 0)
+            if count==0:
+                userNum = 'user' + str(len(file_data))
+                file_data.setdefault('t', {})  # key값에 변수로는 왜 바로 안되는지 모르겠네
+                file_data['t']['id'] = userid
+                file_data['t']['pw'] = userpw
+                file_data['t']['name'] = username
+                file_data['t']['age'] = self.spinBox.value()
+                file_data['t']['balance'] = 0  # default
+                file_data['t']['challenge'] = False  # default
+                file_data[userNum] = file_data.pop('t')  # user 번호 설정
 
-            userNum = 'user' + str(len(file_data))
-            file_data.setdefault('t', {})  # key값에 변수로는 왜 바로 안되는지 모르겠네
-            file_data['t']['id'] = userid
-            file_data['t']['pw'] = userpw
-            file_data['t']['name'] = username
-            file_data['t']['age'] = self.spinBox.value()
-            file_data['t']['balance'] = 0  # default
-            file_data['t']['challenge'] = False  # default
-            file_data[userNum] = file_data.pop('t')  # user 번호 설정
-
-            upload(file_data, "jsonTest")  # 서버에 새로운 회원 정보 업로드
-            i = messageBox("가입완료", "회원가입이 완료되었습니다.", 0)
-            if i == 1:
-                self.change()
+                upload(file_data, "jsonTest")  # 서버에 새로운 회원 정보 업로드
+                i = messageBox("가입완료", "회원가입이 완료되었습니다.", 0)
+                if i == 1:
+                    self.change()
 
 
 # upload data file to server _ 서버에 업로드
