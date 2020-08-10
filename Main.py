@@ -392,7 +392,9 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     # TODO: MAIN 버튼 클릭
     def mainBalance(self):
         self.groupBox.setTitle("            'S CAMERA")
-        self.groupBox_ch.hide()
+        self.groupBox_ch.hide() # challenge 가리기
+        # user 가리기
+        # game 가리기
         self.ImgWidget.show()
         self.btnCamera.show()
 
@@ -401,8 +403,10 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.groupBox.setTitle("            'S CHALLENGE BOARD")
         self.groupBox_ch.show()
         self.cameraOff()
-        self.ImgWidget.hide()
+        self.ImgWidget.hide() # main 가리기
         self.btnCamera.hide()
+        # user 가리기
+        # game 가리기
 
         challengeData = readServerData('challengeBoard')
         model = QStandardItemModel()
@@ -412,19 +416,30 @@ class MainPage(QtWidgets.QMainWindow, form_4):
 
     # TODO: 내 차례 challenge 수행
     def myTurn(self):
+        # challenge유무를 나타내는 전역변수 - true
+        # game 화면으로 이동, 이때 game화면에는 challenge 중임을 표시
+        # 1 게임 종료 후, challenge 화면으로 돌아옴
+        # 전역변수 - false
         return 0
 
     # TODO: 다음 차례 challenge 수행할 user 선택
     def chooseNext(self):
+        # 새 창을 띄움 - user목록 나열 // list or table 사용
+        # 목록 내 검색 기능
+        # 선택한 user를 다음 상대로 지목
+        # challengeBoard.json 마지막에 지목한 상대의 아이디 추가
         return 0
 
     # TODO: USER 버튼 클릭
     def userData(self):
         self.groupBox.setTitle("            'S DATA")
-        self.groupBox_ch.hide()
+        self.groupBox_ch.hide() # challenge 가리기
+        # game 가리기
         self.cameraOff()
-        self.ImgWidget.hide()
+        self.ImgWidget.hide() # main 가리기
         self.btnCamera.hide()
+
+    # TODO: GAME 버튼 클릭
 
     def logout(self):
         self.close()
