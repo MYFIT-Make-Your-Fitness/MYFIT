@@ -46,7 +46,7 @@
     <widget class="QPushButton" name="btnCamera">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>25</x>
        <y>690</y>
        <width>201</width>
        <height>41</height>
@@ -113,7 +113,7 @@
       <rect>
        <x>910</x>
        <y>630</y>
-       <width>261</width>
+       <width>251</width>
        <height>51</height>
       </rect>
      </property>
@@ -124,8 +124,8 @@
     <widget class="QLabel" name="loginName">
      <property name="geometry">
       <rect>
-       <x>16</x>
-       <y>-5</y>
+       <x>20</x>
+       <y>-2</y>
        <width>81</width>
        <height>31</height>
       </rect>
@@ -142,13 +142,12 @@
     <widget class="QWidget" name="ImgWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>25</x>
        <y>40</y>
-       <width>871</width>
-       <height>631</height>
+       <width>881</width>
+       <height>641</height>
       </rect>
      </property>
-     <zorder>listView</zorder>
     </widget>
     <widget class="QGroupBox" name="groupBox_ch">
      <property name="geometry">
@@ -196,6 +195,19 @@
         <width>631</width>
         <height>601</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btnNew">
+      <property name="geometry">
+       <rect>
+        <x>670</x>
+        <y>570</y>
+        <width>201</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>NEW</string>
       </property>
      </widget>
     </widget>
