@@ -344,14 +344,14 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setupUi(self)
         self.setWindowTitle('MYFIT USER\'S PAGE')
-        MainPage.capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
+        # MainPage.capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
 
         # login한 user의 이름 표시
         MainPage.userid = loginPage.userid
         MainPage.username = loginPage.username
         self.loginName.setText(MainPage.username)
 
-        self.btnCamera.clicked.connect(self.startCamera)
+        self.btnCamera.clicked.connect(self.cameraOnOff)
         self.btnChallenge.clicked.connect(self.challenge)
         self.btnTurn.clicked.connect(self.myTurn)
         self.btnNext.clicked.connect(self.chooseNext)
@@ -415,17 +415,27 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def logout(self):
         self.close()
 
-    def startCamera(self):
+    def cameraOnOff(self):
         global running
-        running = True
+        if running: # Camera OFF
+            running = False
+            MainPage.capture_thread = None
+            # self.ImgWidget.hide()
+        else: # Camera ON
+            # self.ImgWidget.show()
+            MainPage.capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
+            running = True
+            MainPage.capture_thread.start()
         self.btnCamera.setEnabled(False)
         self.btnCamera.setText('Loading...')
 
-    # TODO: Camera OFF
-
     def update_frame(self):
         if not q.empty():
-            self.btnCamera.setText('ON')
+            self.btnCamera.setEnabled(True)
+            if running:
+                self.btnCamera.setText('ON')
+            else:
+                self.btnCamera.setText('CAMERA')
             frame = q.get()
             img = frame["img"]
 
