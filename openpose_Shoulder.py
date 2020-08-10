@@ -104,7 +104,7 @@ while cv2.waitKey(1) < 0:
                 cv2.circle(frame, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
                 if partB==2: #Right Shoulder인 경우 좌표 저장
                     temp_a=points[partB]
-                if partB==5: #left Shoulder인 경우 좌표 저장
+                if partB==5 and temp_a!=0: #left Shoulder인 경우 좌표 저장
                     temp_b=points[partB]
                     temp=temp_a[0]-temp_b[0] #기울기 구하기 위하여 x증가량
                     temp2=temp_a[1]-temp_b[1] #기울기 구하기 위하여 y증가량
