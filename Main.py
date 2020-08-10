@@ -351,10 +351,12 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         MainPage.username = loginPage.username
         self.loginName.setText(MainPage.username)
 
-        self.btnCamera.clicked.connect(self.cameraOnOff)
+        self.btnCamera.clicked.connect(self.camera)
+        self.btnMain.clicked.connect(self.mainBalance)
         self.btnChallenge.clicked.connect(self.challenge)
         self.btnTurn.clicked.connect(self.myTurn)
         self.btnNext.clicked.connect(self.chooseNext)
+        self.btnUser.clicked.connect(self.userData)
         self.btnLogout.clicked.connect(self.logout)
         self.groupBox_ch.hide()
 
@@ -366,7 +368,6 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.timer.start(1)
 
         self.Exit_button()
-        # TODO: 아래는 게임 버튼 눌렀을 때 적용
         self.checkFirst()
 
     def Exit_button(self):
@@ -388,21 +389,26 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                     i = messageBox("자세 측정 필요", "최초 자세 측정 데이터가 필요합니다.", 0)
                     break
 
+    # TODO: MAIN 버튼 클릭
+    def mainBalance(self):
+        self.groupBox.setTitle("            'S CAMERA")
+        self.groupBox_ch.hide()
+        self.ImgWidget.show()
+        self.btnCamera.show()
+
     # TODO: challengeBoard.json, users.json 연동 방법
     def challenge(self):
         self.groupBox.setTitle("            'S CHALLENGE BOARD")
         self.groupBox_ch.show()
+        self.cameraOff()
         self.ImgWidget.hide()
-        self.btnCamera.setEnabled(False)
+        self.btnCamera.hide()
 
         challengeData = readServerData('challengeBoard')
-
         model = QStandardItemModel()
         for c in challengeData:
             model.appendRow(QStandardItem(challengeData[c]['id']))
         self.listView.setModel(model)
-
-    # TODO: MAIN 버튼 클릭
 
     # TODO: 내 차례 challenge 수행
     def myTurn(self):
@@ -412,14 +418,21 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def chooseNext(self):
         return 0
 
+    # TODO: USER 버튼 클릭
+    def userData(self):
+        self.groupBox.setTitle("            'S DATA")
+        self.groupBox_ch.hide()
+        self.cameraOff()
+        self.ImgWidget.hide()
+        self.btnCamera.hide()
+
     def logout(self):
         self.close()
 
-    def cameraOnOff(self):
+    def camera(self):
         global running
         if running: # Camera OFF
-            running = False
-            MainPage.capture_thread = None
+            self.cameraOff()
             # self.ImgWidget.hide()
         else: # Camera ON
             # self.ImgWidget.show()
@@ -428,6 +441,11 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             MainPage.capture_thread.start()
         self.btnCamera.setEnabled(False)
         self.btnCamera.setText('Loading...')
+
+    def cameraOff(self):
+        global running
+        running = False
+        MainPage.capture_thread = None
 
     def update_frame(self):
         if not q.empty():
