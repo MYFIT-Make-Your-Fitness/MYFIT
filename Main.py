@@ -29,6 +29,9 @@ form_3, base_3 = uic.loadUiType(uifile_3)
 uifile_4 = 'simple.ui'  # main
 form_4, base_4 = uic.loadUiType(uifile_4)
 
+uifile_5 = 'nextTurn.ui' # next
+form_5, base_5 = uic.loadUiType(uifile_5)
+
 
 class Start(base_1, form_1):
     def __init__(self):
@@ -340,6 +343,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     userid = ''
     username = ''
     capture_thread = None
+    chNum = -1
 
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -409,6 +413,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.btnCamera.hide()
         # user 가리기
         # game 가리기
+        self.btnTurn.setEnabled(True)
 
         userData = readServerData('users')
         for u in userData:
@@ -420,14 +425,17 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             for c in challengeData:
                 if str(challengeNum) == c:
                     challengers = challengeData[c]['challengers']
-                    for chUser in challengers:
-                        model.appendRow(QStandardItem(chUser))
+                    for chUserid in challengers:
+                        model.appendRow(QStandardItem(chUserid))
                     break
+            if chUserid != MainPage.userid: # challengeBoard.json에서 해당 챌린지의 마지막 주자 확인
+                self.btnTurn.setEnabled(False)
             self.listView.setModel(model)
 
     # TODO: 내 차례 challenge 수행
     def myTurn(self):
-        if self.checkMyturn() != -1:
+        MainPage.chNum = self.checkMyturn()
+        if MainPage.chNum != -1:
             # game 화면으로 이동, 이때 game화면에는 challenge 중임을 표시
             # 1 게임 종료 후, challenge 화면으로 돌아옴
             # chNum = -1: 서버에도 적용
@@ -438,21 +446,11 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         chNum = userdata['chNum']
         return chNum
 
-    # challengeBoard.json에서 해당 챌린지의 마지막 주자 확인
-    # chBoard = readServerData('challengeBoard.json')
-    # challengers = chBoard[i] # challengers는 list
-    # lastid = challengers[len(challengers)]
-    # # 마지막 주자 id와 user id비교
-    # if lastid == MainPage.userid:  # 일치하는 경우
-    #     return True
-
     # TODO: 다음 차례 challenge 수행할 user 선택
     def chooseNext(self):
         # 새 창을 띄움 - user목록 나열 // list or table 사용
-        # 목록 내 검색 기능
-        # 선택한 user를 다음 상대로 지목
-        # challengeBoard.json 마지막에 지목한 상대의 아이디 추가
-        return 0
+        self.dialog = nextDialog()
+        self.dialog.show()
 
     # TODO: 새로운 challenge 생성
     def newCh(self):
@@ -520,6 +518,47 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def closeEvent(self, event):
         global running
         running = False
+
+
+class nextDialog(base_5, form_5):
+    max = 0
+    def __init__(self):
+        super(base_5, self).__init__()
+        self.setupUi(self)
+        self.setWindowTitle('CHOOSE NEXT')
+        self.showUserTable()
+        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.btnSelect.clicked.connect(self.choose)
+
+    def showUserTable(self):
+        users = readServerData("users")
+        model = QStandardItemModel()
+        model.setColumnCount(2)
+        global max
+        max = 0
+        j = 1
+        for c in users:
+            model.appendRow(QStandardItem(users[c]['id']))
+            model.setItem(max, j, QStandardItem('select'))
+            # model.item(i, j).clicked.connect(self.choose, i, j)
+            max += 1
+        self.tableView.setModel(model)
+
+    def choose(self):
+        # TODO: 선택된 유저 확인 - 어떻게 접근해야하지...?
+        nextUserid = ''
+        # for j in range(max):
+            # if self.tableView.#item(0, j).hasSelection:
+            # nextUserid = self.tableView[0,j].text()
+
+        # challengeBoard.json 마지막에 지목한 상대의 아이디 추가
+        chBoard = readServerData('challengeBoard')
+        for c in chBoard:
+            if c == str(MainPage.chNum):
+                chBoard[c].append(nextUserid)
+        upload(chBoard, 'challengeBoard.json')
+
+
 
 
 # 메시지박스(알림창) 함수
