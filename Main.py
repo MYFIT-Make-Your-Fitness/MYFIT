@@ -96,15 +96,15 @@ class loginPage(base_2, form_2):
 
     def login(self):  # 로그인
         loginOk = False  # 로그인 성공 여부
-        userid = self.inputId.text()
+        userid = self.inputId.text()  # local value
         userpw = self.inputPw.text()
         if userid != '' and userpw != '':
-            serverData = readServerData("users")  # 서버 데이터 읽어옴
-            for i in serverData:
-                if serverData[i]['id'] == userid:  # check id
-                    if serverData[i]['pw'] == userpw:  # check pw
+            users = readServerData("users")  # 서버 데이터 읽어옴
+            for i in users:
+                if users[i]['id'] == userid:  # check id
+                    if users[i]['pw'] == userpw:  # check pw
                         loginPage.userid = userid
-                        loginPage.username = serverData[i]['name']
+                        loginPage.username = users[i]['name']
                         loginOk = True
                         break
 
@@ -147,24 +147,25 @@ class SignPage(base_3, form_3):
         if userid == '' or userpw == '' or username == '':
             messageBox("경고", "ID, PASSWORD와 이름은 필수 항목입니다.", 0)
         else:
-            file_data = readServerData("users")
+            users = readServerData("users")
+
             count = 0
-            for i in file_data:  # id 중복 검사
-                if file_data[i]['id'] == userid:  # check id
+            for i in users:  # id 중복 검사
+                if users[i]['id'] == userid:  # check id
                     count = 1
                     messageBox("경고", "ID 중복", 0)
             if count == 0:
-                userNum = 'user' + str(len(file_data))
-                file_data.setdefault('t', {})  # key 값에 변수로는 왜 바로 안되는지 모르겠네
-                file_data['t']['id'] = userid
-                file_data['t']['pw'] = userpw
-                file_data['t']['name'] = username
-                file_data['t']['age'] = self.spinBox.value()
-                file_data['t']['balance'] = 0  # default
-                file_data['t']['challenge'] = False  # default
-                file_data[userNum] = file_data.pop('t')  # user 번호 설정
+                userNum = 'user' + str(len(users))
+                users.setdefault('t', {})  # key 값에 변수로는 왜 바로 안되는지 모르겠네
+                users['t']['id'] = userid
+                users['t']['pw'] = userpw
+                users['t']['name'] = username
+                users['t']['age'] = self.spinBox.value()
+                users['t']['balance'] = []  # default
+                users['t']['challengeNum'] = -1  # default
+                users[userNum] = users.pop('t')  # user 번호 설정
 
-                upload(file_data, "users")  # 서버에 새로운 회원 정보 업로드
+                upload(users, "users")  # 서버에 새로운 회원 정보 업로드
                 i = messageBox("가입완료", "회원가입이 완료되었습니다.", 0)
                 if i == 1:
                     self.change()
@@ -356,6 +357,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.btnChallenge.clicked.connect(self.challenge)
         self.btnTurn.clicked.connect(self.myTurn)
         self.btnNext.clicked.connect(self.chooseNext)
+        self.btnNew.clicked.connect(self.newCh)
         self.btnUser.clicked.connect(self.userData)
         self.btnLogout.clicked.connect(self.logout)
         self.groupBox_ch.hide()
@@ -392,7 +394,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     # TODO: MAIN 버튼 클릭
     def mainBalance(self):
         self.groupBox.setTitle("            'S CAMERA")
-        self.groupBox_ch.hide() # challenge 가리기
+        self.groupBox_ch.hide()  # challenge 가리기
         # user 가리기
         # game 가리기
         self.ImgWidget.show()
@@ -403,24 +405,46 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.groupBox.setTitle("            'S CHALLENGE BOARD")
         self.groupBox_ch.show()
         self.cameraOff()
-        self.ImgWidget.hide() # main 가리기
+        self.ImgWidget.hide()  # main 가리기
         self.btnCamera.hide()
         # user 가리기
         # game 가리기
 
-        challengeData = readServerData('challengeBoard')
-        model = QStandardItemModel()
-        for c in challengeData:
-            model.appendRow(QStandardItem(challengeData[c]['id']))
-        self.listView.setModel(model)
+        userData = readServerData('users')
+        for u in userData:
+            if MainPage.userid == userData[u]['id']:
+                challengeNum = userData[u]['challengeNum']
+        if challengeNum != -1:
+            challengeData = readServerData('challengeBoard')
+            model = QStandardItemModel()
+            for c in challengeData:
+                if str(challengeNum) == c:
+                    challengers = challengeData[c]['challengers']
+                    for chUser in challengers:
+                        model.appendRow(QStandardItem(chUser))
+                    break
+            self.listView.setModel(model)
 
     # TODO: 내 차례 challenge 수행
     def myTurn(self):
-        # challenge유무를 나타내는 전역변수 - true
-        # game 화면으로 이동, 이때 game화면에는 challenge 중임을 표시
-        # 1 게임 종료 후, challenge 화면으로 돌아옴
-        # 전역변수 - false
-        return 0
+        if self.checkMyturn() != -1:
+            # game 화면으로 이동, 이때 game화면에는 challenge 중임을 표시
+            # 1 게임 종료 후, challenge 화면으로 돌아옴
+            # chNum = -1: 서버에도 적용
+            return 0
+
+    def checkMyturn(self):  # 내 차례인지 확인하는 함수
+        userdata = readServerData(MainPage.userid)
+        chNum = userdata['chNum']
+        return chNum
+
+    # challengeBoard.json에서 해당 챌린지의 마지막 주자 확인
+    # chBoard = readServerData('challengeBoard.json')
+    # challengers = chBoard[i] # challengers는 list
+    # lastid = challengers[len(challengers)]
+    # # 마지막 주자 id와 user id비교
+    # if lastid == MainPage.userid:  # 일치하는 경우
+    #     return True
 
     # TODO: 다음 차례 challenge 수행할 user 선택
     def chooseNext(self):
@@ -430,13 +454,19 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         # challengeBoard.json 마지막에 지목한 상대의 아이디 추가
         return 0
 
+    # TODO: 새로운 challenge 생성
+    def newCh(self):
+        # 새 창을 띄움 - 챌린지 인원, 게임 선택(어차피 하나지만ㅎ)
+        # 완료버튼을 누름으로써 challengeBoard.json에 새로운 챌린지 data 추가
+        return 0
+
     # TODO: USER 버튼 클릭
     def userData(self):
         self.groupBox.setTitle("            'S DATA")
-        self.groupBox_ch.hide() # challenge 가리기
+        self.groupBox_ch.hide()  # challenge 가리기
         # game 가리기
         self.cameraOff()
-        self.ImgWidget.hide() # main 가리기
+        self.ImgWidget.hide()  # main 가리기
         self.btnCamera.hide()
 
     # TODO: GAME 버튼 클릭
@@ -446,10 +476,10 @@ class MainPage(QtWidgets.QMainWindow, form_4):
 
     def camera(self):
         global running
-        if running: # Camera OFF
+        if running:  # Camera OFF
             self.cameraOff()
             # self.ImgWidget.hide()
-        else: # Camera ON
+        else:  # Camera ON
             # self.ImgWidget.show()
             MainPage.capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
             running = True
