@@ -148,14 +148,15 @@
        <height>641</height>
       </rect>
      </property>
+     <zorder>groupBox_ch</zorder>
     </widget>
     <widget class="QGroupBox" name="groupBox_ch">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>40</y>
-       <width>891</width>
-       <height>641</height>
+       <x>0</x>
+       <y>30</y>
+       <width>911</width>
+       <height>661</height>
       </rect>
      </property>
      <property name="title">
@@ -210,6 +211,138 @@
        <string>NEW</string>
       </property>
      </widget>
+     <zorder>btnNext</zorder>
+     <zorder>btnTurn</zorder>
+     <zorder>listView</zorder>
+     <zorder>btnNew</zorder>
+     <zorder>groupBox_us</zorder>
+    </widget>
+    <widget class="QPushButton" name="btnCamera_2">
+     <property name="geometry">
+      <rect>
+       <x>25</x>
+       <y>690</y>
+       <width>201</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CAMERA</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_us">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>30</y>
+       <width>911</width>
+       <height>661</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+     <widget class="QLabel" name="btnId">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>70</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>ID :</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="btnId_input">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>60</y>
+        <width>91</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="btnName">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>120</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>NAME :</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="btnName_input">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>110</y>
+        <width>131</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="btnBalance">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>230</y>
+        <width>171</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>BALANCE :</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="btnAge">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>180</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>AGE :</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="btnAge_input">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>180</y>
+        <width>121</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="PlotWidget" name="Graph" native="true">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>280</y>
+        <width>661</width>
+        <height>321</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <zorder>ImgWidget</zorder>
     <zorder>btnCamera</zorder>
@@ -220,6 +353,8 @@
     <zorder>btnLogout</zorder>
     <zorder>loginName</zorder>
     <zorder>groupBox_ch</zorder>
+    <zorder>btnCamera_2</zorder>
+    <zorder>groupBox_us</zorder>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -234,6 +369,14 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QWidget</extends>
+   <header>pyqtgraph</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
