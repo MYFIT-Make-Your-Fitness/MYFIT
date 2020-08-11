@@ -10,11 +10,11 @@ from ftplib import FTP
 from io import BytesIO
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 from PyQt5 import QtCore, uic, QtWidgets, QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from pyqtgraph import PlotWidget, plot #그래프 그리기 위해서
 
 # load both ui file
 uifile_1 = 'Start.ui'  # start
@@ -216,8 +216,6 @@ if MODE is "COCO":
 net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
 
-# shoulderResult = []  # 어깨 측정 list
-
 # 스레드 돌아가는 함수
 def grab(cam, queue, width, height, fps):
     shoulderResult = []  # 어깨 측정 list
@@ -310,15 +308,13 @@ def grab(cam, queue, width, height, fps):
             queue.put(frame)
         else:
             print(queue.qsize())
+    if len(shoulderResult)!=0:
+        result=round((sum(shoulderResult)/len(shoulderResult)),1) #어깨 기울임 측정의 평균
+        print(result)
+        #TODO: 서버에 result값 저장
 
 
 # vid_writer.release()
-
-
-def graph(list):
-    plt.plot(list)  # 그래프 시각화
-    plt.show()  # 그래프 표시
-
 
 class OwnImageWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -342,6 +338,7 @@ class OwnImageWidget(QtWidgets.QWidget):
 class MainPage(QtWidgets.QMainWindow, form_4):
     userid = ''
     username = ''
+    userage=''
     capture_thread = None
     chNum = -1
 
@@ -357,7 +354,9 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.loginName.setText(MainPage.username)
 
         self.btnCamera.clicked.connect(self.camera)
+        self.btnCamera_2.clicked.connect(self.camera_2)
         self.btnMain.clicked.connect(self.mainBalance)
+        self.btnGame.clicked.connect(self.game)
         self.btnChallenge.clicked.connect(self.challenge)
         self.btnTurn.clicked.connect(self.myTurn)
         self.btnNext.clicked.connect(self.chooseNext)
@@ -365,6 +364,8 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.btnUser.clicked.connect(self.userData)
         self.btnLogout.clicked.connect(self.logout)
         self.groupBox_ch.hide()
+        self.groupBox_us.hide()
+        self.btnCamera_2.hide()
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
@@ -399,19 +400,20 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def mainBalance(self):
         self.groupBox.setTitle("            'S CAMERA")
         self.groupBox_ch.hide()  # challenge 가리기
-        # user 가리기
+        self.groupBox_us.hide()  # user 가리기
         # game 가리기
         self.ImgWidget.show()
         self.btnCamera.show()
+        self.btnCamera_2.hide()
 
     # TODO: challengeBoard.json, users.json 연동 방법
     def challenge(self):
         self.groupBox.setTitle("            'S CHALLENGE BOARD")
         self.groupBox_ch.show()
+        self.groupBox_us.hide() #user 가리기
         self.cameraOff()
         self.ImgWidget.hide()  # main 가리기
         self.btnCamera.hide()
-        # user 가리기
         # game 가리기
         self.btnTurn.setEnabled(True)
 
@@ -462,17 +464,37 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def userData(self):
         self.groupBox.setTitle("            'S DATA")
         self.groupBox_ch.hide()  # challenge 가리기
+        self.groupBox_us.show()
         # game 가리기
         self.cameraOff()
         self.ImgWidget.hide()  # main 가리기
         self.btnCamera.hide()
+        self.btnId_input.setText(MainPage.userid)
+        self.btnName_input.setText(MainPage.username)
+        userData = readServerData('users')
+        for u in userData: #age 가져오기
+            if MainPage.userid == userData[u]['id']:
+                MainPage.userage = userData[u]['age']
+                break
+        self.btnAge_input.setText(str(MainPage.userage))
+        graph=[]
+        for u in userData: #저장된 balance data 가져오기
+            if MainPage.userid == userData[u]['id']:
+                graph=userData[u]['balance']
+        self.Graph.plot(graph) #widget을 class:PlotWidget, header: pyqtgraph로 하여 승격 후 graph그리기
+
 
     # TODO: GAME 버튼 클릭
+    def game(self):
+        self.groupBox.setTitle("            'S GAME")
+        self.groupBox_ch.hide()
+        self.groupBox_us.hide()
+        self.btnCamera_2.show()
 
     def logout(self):
         self.close()
 
-    def camera(self):
+    def camera(self): #main일때
         global running
         if running:  # Camera OFF
             self.cameraOff()
@@ -484,6 +506,11 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             MainPage.capture_thread.start()
         self.btnCamera.setEnabled(False)
         self.btnCamera.setText('Loading...')
+    
+    def camera_2(self): #game일때
+         #TODO: GAME에서 카메라 버튼을 눌렀을때 동작
+         global running
+
 
     def cameraOff(self):
         global running
