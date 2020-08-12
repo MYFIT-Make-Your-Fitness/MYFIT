@@ -148,15 +148,14 @@
        <height>641</height>
       </rect>
      </property>
-     <zorder>groupBox_ch</zorder>
     </widget>
     <widget class="QGroupBox" name="groupBox_ch">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>30</y>
-       <width>911</width>
-       <height>661</height>
+       <x>10</x>
+       <y>40</y>
+       <width>891</width>
+       <height>641</height>
       </rect>
      </property>
      <property name="title">
@@ -211,11 +210,6 @@
        <string>NEW</string>
       </property>
      </widget>
-     <zorder>btnNext</zorder>
-     <zorder>btnTurn</zorder>
-     <zorder>listView</zorder>
-     <zorder>btnNew</zorder>
-     <zorder>groupBox_us</zorder>
     </widget>
     <widget class="QPushButton" name="btnCamera_2">
      <property name="geometry">
@@ -233,10 +227,10 @@
     <widget class="QGroupBox" name="groupBox_us">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>30</y>
-       <width>911</width>
-       <height>661</height>
+       <x>10</x>
+       <y>40</y>
+       <width>891</width>
+       <height>641</height>
       </rect>
      </property>
      <property name="title">
@@ -245,8 +239,8 @@
      <widget class="QLabel" name="btnId">
       <property name="geometry">
        <rect>
-        <x>90</x>
-        <y>70</y>
+        <x>50</x>
+        <y>30</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -258,8 +252,8 @@
      <widget class="QLabel" name="btnId_input">
       <property name="geometry">
        <rect>
-        <x>170</x>
-        <y>60</y>
+        <x>210</x>
+        <y>30</y>
         <width>261</width>
         <height>41</height>
        </rect>
@@ -271,8 +265,8 @@
      <widget class="QLabel" name="btnName">
       <property name="geometry">
        <rect>
-        <x>90</x>
-        <y>120</y>
+        <x>50</x>
+        <y>80</y>
         <width>101</width>
         <height>41</height>
        </rect>
@@ -285,7 +279,7 @@
       <property name="geometry">
        <rect>
         <x>210</x>
-        <y>110</y>
+        <y>80</y>
         <width>291</width>
         <height>51</height>
        </rect>
@@ -297,8 +291,8 @@
      <widget class="QLabel" name="btnBalance">
       <property name="geometry">
        <rect>
-        <x>90</x>
-        <y>230</y>
+        <x>50</x>
+        <y>180</y>
         <width>171</width>
         <height>51</height>
        </rect>
@@ -310,8 +304,8 @@
      <widget class="QLabel" name="btnAge">
       <property name="geometry">
        <rect>
-        <x>90</x>
-        <y>180</y>
+        <x>50</x>
+        <y>130</y>
         <width>101</width>
         <height>41</height>
        </rect>
@@ -323,8 +317,8 @@
      <widget class="QLabel" name="btnAge_input">
       <property name="geometry">
        <rect>
-        <x>200</x>
-        <y>180</y>
+        <x>210</x>
+        <y>140</y>
         <width>121</width>
         <height>41</height>
        </rect>
@@ -336,10 +330,10 @@
      <widget class="PlotWidget" name="Graph" native="true">
       <property name="geometry">
        <rect>
-        <x>190</x>
-        <y>280</y>
-        <width>661</width>
-        <height>321</height>
+        <x>130</x>
+        <y>240</y>
+        <width>721</width>
+        <height>371</height>
        </rect>
       </property>
      </widget>
