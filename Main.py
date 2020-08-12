@@ -12,6 +12,7 @@ from io import BytesIO
 import cv2
 import numpy as np
 from PyQt5 import QtCore, uic, QtWidgets, QtGui
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from pyqtgraph import PlotWidget, plot #그래프 그리기 위해서
@@ -29,7 +30,7 @@ form_3, base_3 = uic.loadUiType(uifile_3)
 uifile_4 = 'simple.ui'  # main
 form_4, base_4 = uic.loadUiType(uifile_4)
 
-uifile_5 = 'nextTurn.ui' # next
+uifile_5 = 'turn2.ui' # next
 form_5, base_5 = uic.loadUiType(uifile_5)
 
 
@@ -182,7 +183,8 @@ def upload(file_data, fileName):
     tempF = json.dumps(file_data, indent="\t")
     tempF = bytes(tempF, "utf8")
     file_like = BytesIO(tempF)
-    ftp.storbinary('STOR users.json', file_like)
+    str = "STOR "+fileName+".json"
+    ftp.storbinary(str, file_like)
 
 
 # server Data를 읽어옴
@@ -444,7 +446,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             return 0
 
     def checkMyturn(self):  # 내 차례인지 확인하는 함수
-        userdata = readServerData(MainPage.userid)
+        userdata = readServerData("users")
         chNum = userdata['chNum']
         return chNum
 
@@ -553,38 +555,41 @@ class nextDialog(base_5, form_5):
         super(base_5, self).__init__()
         self.setupUi(self)
         self.setWindowTitle('CHOOSE NEXT')
-        self.showUserTable()
-        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.loadUserdata() # table 출력
         self.btnSelect.clicked.connect(self.choose)
 
-    def showUserTable(self):
-        users = readServerData("users")
-        model = QStandardItemModel()
-        model.setColumnCount(2)
+    def loadUserdata(self):
+        users = readServerData("users") # 딕셔너리로 반환- 길이 = user 수
+        self.tableWidget.setRowCount(len(users))
+        self.tableWidget.setColumnCount(1)
+
         global max
         max = 0
-        j = 1
         for c in users:
-            model.appendRow(QStandardItem(users[c]['id']))
-            model.setItem(max, j, QStandardItem('select'))
-            # model.item(i, j).clicked.connect(self.choose, i, j)
+            item = QTableWidgetItem(users[c]['id'])
+            self.tableWidget.setItem(max, 0, item)
             max += 1
-        self.tableView.setModel(model)
+        self.tableWidget.resizeRowsToContents() # 행 크기 조절
+        self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("USER")) # 헤더 설정
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers) # 읽기 전용
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection) # 하나만 선택가능
 
     def choose(self):
         # TODO: 선택된 유저 확인 - 어떻게 접근해야하지...?
         nextUserid = ''
-        # for j in range(max):
-            # if self.tableView.#item(0, j).hasSelection:
-            # nextUserid = self.tableView[0,j].text()
+        if self.tableWidget.currentItem() is None:
+            messageBox("선택없음", "다음 챌린저를 선택하십시오.", 0)
+        else:
+            row = self.tableWidget.currentItem().row()
+            nextUserid = self.tableWidget.item(row, 0).text()
+            # challengeBoard.json 마지막에 지목한 상대의 아이디 추가
+            chBoard = readServerData('challengeBoard')
+            for c in chBoard:
+                if c == str(MainPage.chNum):
+                    chBoard[c].append(nextUserid)
+            upload(chBoard, 'challengeBoard')
 
-        # challengeBoard.json 마지막에 지목한 상대의 아이디 추가
-        chBoard = readServerData('challengeBoard')
-        for c in chBoard:
-            if c == str(MainPage.chNum):
-                chBoard[c].append(nextUserid)
-        upload(chBoard, 'challengeBoard.json')
-
+        self.close()
 
 
 
