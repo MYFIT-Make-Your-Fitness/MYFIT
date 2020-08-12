@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>421</width>
-    <height>618</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,30 +16,20 @@
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>9</x>
-     <y>9</y>
+     <x>10</x>
+     <y>10</y>
      <width>401</width>
-     <height>601</height>
+     <height>391</height>
     </rect>
    </property>
    <property name="title">
-    <string>NEXT TURN</string>
+    <string>CHOOSE NEXT TURN</string>
    </property>
-   <widget class="QTableView" name="tableView">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>30</y>
-      <width>381</width>
-      <height>511</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="btnCancel">
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>550</y>
+      <y>75</y>
       <width>91</width>
       <height>41</height>
      </rect>
@@ -51,14 +41,24 @@
    <widget class="QPushButton" name="btnSelect">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>550</y>
+      <x>300</x>
+      <y>25</y>
       <width>91</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
      <string>선택</string>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tableWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>25</y>
+      <width>281</width>
+      <height>351</height>
+     </rect>
     </property>
    </widget>
   </widget>
