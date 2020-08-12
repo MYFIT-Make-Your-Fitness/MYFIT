@@ -15,7 +15,7 @@ from PyQt5 import QtCore, uic, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from pyqtgraph import PlotWidget, plot #그래프 그리기 위해서
+from pyqtgraph import PlotWidget, plot  # 그래프 그리기 위해서
 
 # load both ui file
 uifile_1 = 'Start.ui'  # start
@@ -30,7 +30,7 @@ form_3, base_3 = uic.loadUiType(uifile_3)
 uifile_4 = 'simple.ui'  # main
 form_4, base_4 = uic.loadUiType(uifile_4)
 
-uifile_5 = 'turn2.ui' # next
+uifile_5 = 'turn2.ui'  # next
 form_5, base_5 = uic.loadUiType(uifile_5)
 
 
@@ -183,7 +183,7 @@ def upload(file_data, fileName):
     tempF = json.dumps(file_data, indent="\t")
     tempF = bytes(tempF, "utf8")
     file_like = BytesIO(tempF)
-    str = "STOR "+fileName+".json"
+    str = "STOR " + fileName + ".json"
     ftp.storbinary(str, file_like)
 
 
@@ -310,10 +310,10 @@ def grab(cam, queue, width, height, fps):
             queue.put(frame)
         else:
             print(queue.qsize())
-    if len(shoulderResult)!=0:
-        result=round((sum(shoulderResult)/len(shoulderResult)),1) #어깨 기울임 측정의 평균
+    if len(shoulderResult) != 0:
+        result = round((sum(shoulderResult) / len(shoulderResult)), 1)  # 어깨 기울임 측정의 평균
         print(result)
-        #TODO: 서버에 result값 저장
+        # TODO: 서버에 result값 저장
 
 
 # vid_writer.release()
@@ -340,9 +340,10 @@ class OwnImageWidget(QtWidgets.QWidget):
 class MainPage(QtWidgets.QMainWindow, form_4):
     userid = ''
     username = ''
-    userage=''
+    userage = ''
     capture_thread = None
     chNum = -1
+    chturnclose = False
 
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -412,7 +413,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def challenge(self):
         self.groupBox.setTitle("            'S CHALLENGE BOARD")
         self.groupBox_ch.show()
-        self.groupBox_us.hide() #user 가리기
+        self.groupBox_us.hide()  # user 가리기
         self.cameraOff()
         self.ImgWidget.hide()  # main 가리기
         self.btnCamera.hide()
@@ -432,29 +433,42 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                     for chUserid in challengers:
                         model.appendRow(QStandardItem(chUserid))
                     break
-            if chUserid != MainPage.userid: # challengeBoard.json에서 해당 챌린지의 마지막 주자 확인
+            if chUserid != MainPage.userid:  # challengeBoard.json에서 해당 챌린지의 마지막 주자 확인
                 self.btnTurn.setEnabled(False)
             self.listView.setModel(model)
+        self.challengeNum()
 
     # TODO: 내 차례 challenge 수행
     def myTurn(self):
-        MainPage.chNum = self.checkMyturn()
-        if MainPage.chNum != -1:
+        if MainPage.chNum != -1: # 진행 중 챌린지 있음
+            self.btnTurn.setEnabled(True)
             # game 화면으로 이동, 이때 game화면에는 challenge 중임을 표시
             # 1 게임 종료 후, challenge 화면으로 돌아옴
-            # chNum = -1: 서버에도 적용
-            return 0
+            # 챌린지 참여 완료 표시
+            # 참여 완료 후, self.btnTurn.setEnabled(False)
+        else: # 진행 중 챌린지 없음
+            messageBox("챌린지 없음", "현재 참여 중인 챌린지가 없습니다.", 0)
 
-    def checkMyturn(self):  # 내 차례인지 확인하는 함수
+
+    def challengeNum(self):  # 참여 중인 챌린지 번호 확인
         userdata = readServerData("users")
-        chNum = userdata['chNum']
-        return chNum
+        for u in userdata:
+            if MainPage.userid == userdata[u]['id']:
+                MainPage.chNum = userdata[u]['challengeNum']
+                break
 
     # TODO: 다음 차례 challenge 수행할 user 선택
     def chooseNext(self):
         # 새 창을 띄움 - user목록 나열 // list or table 사용
-        self.dialog = nextDialog()
-        self.dialog.show()
+        self.challengeNum()
+        if MainPage.chNum == -1:
+            messageBox("챌린지 없음", "현재 참여 중인 챌린지가 없습니다.", 0)
+        else:
+            # if 챌린지 참여 완료 시
+            self.dialog = nextDialog()
+            self.dialog.show()
+            # else:
+            #     messageBox("챌린지 오류", "진행하지 않은 챌린지가 있습니다.", 0)
 
     # TODO: 새로운 challenge 생성
     def newCh(self):
@@ -474,17 +488,16 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.btnId_input.setText(MainPage.userid)
         self.btnName_input.setText(MainPage.username)
         userData = readServerData('users')
-        for u in userData: #age 가져오기
+        for u in userData:  # age 가져오기
             if MainPage.userid == userData[u]['id']:
                 MainPage.userage = userData[u]['age']
                 break
         self.btnAge_input.setText(str(MainPage.userage))
-        graph=[]
-        for u in userData: #저장된 balance data 가져오기
+        graph = []
+        for u in userData:  # 저장된 balance data 가져오기
             if MainPage.userid == userData[u]['id']:
-                graph=userData[u]['balance']
-        self.Graph.plot(graph) #widget을 class:PlotWidget, header: pyqtgraph로 하여 승격 후 graph그리기
-
+                graph = userData[u]['balance']
+        self.Graph.plot(graph)  # widget을 class:PlotWidget, header: pyqtgraph로 하여 승격 후 graph그리기
 
     # TODO: GAME 버튼 클릭
     def game(self):
@@ -496,7 +509,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def logout(self):
         self.close()
 
-    def camera(self): #main일때
+    def camera(self):  # main일때
         global running
         if running:  # Camera OFF
             self.cameraOff()
@@ -508,11 +521,10 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             MainPage.capture_thread.start()
         self.btnCamera.setEnabled(False)
         self.btnCamera.setText('Loading...')
-    
-    def camera_2(self): #game일때
-         #TODO: GAME에서 카메라 버튼을 눌렀을때 동작
-         global running
 
+    def camera_2(self):  # game일때
+        # TODO: GAME에서 카메라 버튼을 눌렀을때 동작
+        global running
 
     def cameraOff(self):
         global running
@@ -550,32 +562,32 @@ class MainPage(QtWidgets.QMainWindow, form_4):
 
 
 class nextDialog(base_5, form_5):
-    max = 0
     def __init__(self):
         super(base_5, self).__init__()
         self.setupUi(self)
         self.setWindowTitle('CHOOSE NEXT')
-        self.loadUserdata() # table 출력
+        self.loadUserData()  # table 출력
         self.btnSelect.clicked.connect(self.choose)
+        self.btnCancel.clicked.connect(self.cancel)
 
-    def loadUserdata(self):
-        users = readServerData("users") # 딕셔너리로 반환- 길이 = user 수
-        self.tableWidget.setRowCount(len(users))
+    def loadUserData(self):
+        users = readServerData("users")  # 딕셔너리로 반환- 길이 = user 수
+        items = []
+        for u in users:
+            if users[u]['challengeNum'] == -1 and users[u]['id'] != MainPage.userid:
+                items.append(users[u]['id'])
+        self.tableWidget.setRowCount(len(items))
         self.tableWidget.setColumnCount(1)
+        for i in items:
+            item = QTableWidgetItem(i)
+            self.tableWidget.setItem(items.index(i), 0, item)
 
-        global max
-        max = 0
-        for c in users:
-            item = QTableWidgetItem(users[c]['id'])
-            self.tableWidget.setItem(max, 0, item)
-            max += 1
-        self.tableWidget.resizeRowsToContents() # 행 크기 조절
-        self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("USER")) # 헤더 설정
-        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers) # 읽기 전용
-        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection) # 하나만 선택가능
+        self.tableWidget.resizeRowsToContents()  # 행 크기 조절
+        self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("USER"))  # 헤더 설정
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)  # 읽기 전용
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)  # 하나만 선택가능
 
     def choose(self):
-        # TODO: 선택된 유저 확인 - 어떻게 접근해야하지...?
         nextUserid = ''
         if self.tableWidget.currentItem() is None:
             messageBox("선택없음", "다음 챌린저를 선택하십시오.", 0)
@@ -586,11 +598,22 @@ class nextDialog(base_5, form_5):
             chBoard = readServerData('challengeBoard')
             for c in chBoard:
                 if c == str(MainPage.chNum):
-                    chBoard[c].append(nextUserid)
+                    chBoard[c]['challengers'].append(nextUserid)
+                    break
             upload(chBoard, 'challengeBoard')
 
+            userData = readServerData('users')
+            for u in userData:
+                if MainPage.userid == userData[u]['id']:
+                    userData[u]['challengeNum'] = -1 # 진행 중인 챌린지 없음으로 표시
+                if nextUserid == userData[u]['id']:
+                    userData[u]['challengeNum'] = MainPage.chNum # 진행 중 챌린지 번호 표시
+            upload(userData, 'users')
+        messageBox("선택 완료", "다음 챌린저를 선택 완료했습니다.", 0)
         self.close()
 
+    def cancel(self):
+        self.close()
 
 
 # 메시지박스(알림창) 함수
