@@ -355,7 +355,7 @@ class newChDialog(base_6, form_6):
 
     def create(self):
         chBoard = readServerData('challengeBoard')
-        chNum = str(len(chBoard))
+        chNum = len(chBoard)
 
         users = readServerData('users')
         i = -1
@@ -367,12 +367,23 @@ class newChDialog(base_6, form_6):
                 upload(chBoard, "challengeBoard")  # 서버에 업로드
                 upload(users, "users")  # 유저 정보에 업로드
                 i = messageBox("챌린지 생성", "새로운 챌린지가 생성되었습니다.", 0)
-                if i == 1:
-                    self.close()
-        messageBox("챌린지 생성 실패", "이미 참여 중인 챌린지가 있습니다.", 0)
+                break
+        if i == 1:
+            challengeNumCount()
+            self.close()
+        else:
+            messageBox("챌린지 생성 실패", "이미 참여 중인 챌린지가 있습니다.", 0)
 
     def cancel(self):
         self.close()
+
+
+def challengeNumCount():  # 참여 중인 챌린지 번호 확인
+    userdata = readServerData("users")
+    for u in userdata:
+        if MainPage.userid == userdata[u]['id']:
+            MainPage.chNum = userdata[u]['challengeNum']
+            break
 
 
 class MainPage(QtWidgets.QMainWindow, form_4):
@@ -435,7 +446,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         fileData = readServerData("users")
         for i in fileData:  # id 중복 검사
             if fileData[i]['id'] == loginPage.userid:
-                if fileData[i]['balance'] == 0:
+                if not fileData[i]['balance']:
                     i = messageBox("자세 측정 필요", "최초 자세 측정 데이터가 필요합니다.", 0)
                     break
 
@@ -446,7 +457,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.groupBox_us.hide()  # user 가리기
         self.ImgWidget.show()
         self.btnCamera.show()
-        self.btnCamera_2.hide() # game 가리기
+        self.btnCamera_2.hide()  # game 가리기
 
     def game(self):
         self.groupBox.setTitle("            'S GAME")
@@ -486,10 +497,8 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                     for chUserid in challengers:
                         model.appendRow(QStandardItem(chUserid))
                     break
-            if chUserid != MainPage.userid:  # challengeBoard.json에서 해당 챌린지의 마지막 주자 확인
-                self.btnTurn.setEnabled(False)
             self.listView.setModel(model)
-        self.challengeNum()
+        challengeNumCount()
 
     challengeNow = False
 
@@ -515,15 +524,8 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         else:  # 진행 중 챌린지 없음
             messageBox("챌린지 없음", "현재 참여 중인 챌린지가 없습니다.", 0)
 
-    def challengeNum(self):  # 참여 중인 챌린지 번호 확인
-        userdata = readServerData("users")
-        for u in userdata:
-            if MainPage.userid == userdata[u]['id']:
-                MainPage.chNum = userdata[u]['challengeNum']
-                break
-
     def chooseNext(self):
-        self.challengeNum()
+        challengeNumCount()
         if MainPage.chNum == -1:
             messageBox("챌린지 없음", "현재 참여 중인 챌린지가 없습니다.", 0)
         else:
@@ -566,7 +568,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.Graph.plot(graph)  # widget을 class:PlotWidget, header: pyqtgraph로 하여 승격 후 graph그리기
 
     def logout(self):
-        self.window = Start() #시작화면으로
+        self.window = Start()  # 시작화면으로
         self.window.show()
         self.close()
 
