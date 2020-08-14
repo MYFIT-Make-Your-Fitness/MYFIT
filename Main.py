@@ -2,6 +2,7 @@ import ctypes
 import json
 import os
 import queue
+import random
 import sys
 import threading
 import urllib.request
@@ -218,14 +219,117 @@ if MODE is "COCO":
 net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
 
+def grabGame(cam, queue, width, height, fps):
+    apples = [] # 사과 좌표 생성
+    for i in range(5):
+        apples.append(random.randrange(20, 480))
+    before = len(apples)
+    now = len(apples)
+
+    global running
+    capture = cv2.VideoCapture(cam)
+    inWidth = 368
+    inHeight = 368
+    threshold = 0.1
+
+    apple = random.choice(apples)
+    while running and len(apples) > 0:
+        frame = {}
+        capture.grab()  # 재귀X: VideoCapture 내장 함수
+        retval, img = capture.retrieve(0)  # grab한 프레임을 decode하여 반환
+
+        imgCopy = np.copy(img)
+        if not retval:
+            cv2.waitKey()
+            break
+
+        imgWidth = img.shape[1]
+        imgHeight = img.shape[0]
+
+        inpBlob = cv2.dnn.blobFromImage(img, 1.0 / 255, (inWidth, inHeight), (0, 0, 0), swapRB=False, crop=False)
+        net.setInput(inpBlob)
+        output = net.forward()
+
+        H = output.shape[2]
+        W = output.shape[3]
+
+        # Empty list to store the detected keypoints
+        points = []
+
+        for i in range(nPoints):
+            # confidence map of corresponding body's part.
+            probMap = output[0, i, :, :]
+
+            # Find global maxima of the probMap.
+            minVal, prob, minLoc, point = cv2.minMaxLoc(probMap)
+
+            # Scale the point to fit on the original image
+            x = (imgWidth * point[0]) / W
+            y = (imgHeight * point[1]) / H
+
+            if prob > threshold:
+                cv2.circle(imgCopy, (int(x), int(y)), 8, (0, 255, 255), thickness=-1, lineType=cv2.FILLED)
+                cv2.putText(imgCopy, "{}".format(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2,
+                            lineType=cv2.LINE_AA)
+
+                # Add the point to the list if the probability is greater than the threshold
+                points.append((int(x), int(y)))
+            else:
+                points.append(None)
+
+        # temp_a = 0  # Right shoulder
+        # temp_b = 0  # left shoulder
+        # temp = 0
+        # temp2 = 0
+
+        # Draw Skeleton
+        # for pair in POSE_PAIRS:
+        #     partA = pair[0]
+        #     partB = pair[1]
+        #
+        #     if points[partA] and points[partB]:
+        #         if (partA == 1 and partB == 2) or (
+        #                 partA == 1 and partB == 5):  # Neck-Right Shoulder, Neck-left Shoulder일 경우
+        #             cv2.line(img, points[partA], points[partB], (255, 0, 0), 3, lineType=cv2.LINE_AA)  # 다른 색으로 표시
+        #             cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+        #             cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+        #             if partB == 2:  # Right Shoulder인 경우 좌표 저장
+        #                 temp_a = points[partB]
+        #             if partB == 5 and temp_a != 0:  # left Shoulder인 경우 좌표 저장
+        #                 temp_b = points[partB]
+        #                 temp = temp_a[0] - temp_b[0]  # 기울기 구하기 위하여 x증가량
+        #                 temp2 = temp_a[1] - temp_b[1]  # 기울기 구하기 위하여 y증가량
+        #                 shoulderResult.append(abs(temp2) / abs(temp))  # 절대값을 이용하여 기울기를 구한 후 list에 저장
+        #
+        #         else:
+        #             cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+        #             cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+        #             cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+
+        # 사과 게임 테스트
+        # add apple
+        if before - 1 == now: # 한 개 줄면, 새로운 위치 생성
+            apple = random.choice(apples)
+            before = now
+        cv2.circle(img, (apple, 30), 10, (0, 0, 255), -1)
+        # TODO: handPoint 손목 좌표
+        # if (apple-10 <= handPoint.x <= apple+10) and (20 <= handPoint.y <= 40) # user get apple
+        #   apples.remove(apple)
+        now = len(apples)
+
+        frame["img"] = img
+        if queue.qsize() < 10:
+            queue.put(frame)
+        else:
+            print(queue.qsize())
+
+
+
 # 스레드 돌아가는 함수
 def grab(cam, queue, width, height, fps):
     shoulderResult = []  # 어깨 측정 list
     global running
     capture = cv2.VideoCapture(cam)
-    # capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    # capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    # capture.set(cv2.CAP_PROP_FPS, fps)
     inWidth = 368
     inHeight = 368
     threshold = 0.1
@@ -310,10 +414,17 @@ def grab(cam, queue, width, height, fps):
             queue.put(frame)
         else:
             print(queue.qsize())
+
+    # server에 balance 저장
     if len(shoulderResult) != 0:
-        result = round((sum(shoulderResult) / len(shoulderResult)), 1)  # 어깨 기울임 측정의 평균
-        print(result)
-        # TODO: 서버에 result값 저장
+        result = round((sum(shoulderResult) / len(shoulderResult)), 2)  # 어깨 기울임 측정의 평균
+        users = readServerData('users')
+        for u in users:
+            if users[u]['id'] == MainPage.userid:
+                users[u]['balance'].append(result)
+                break
+        upload(users, 'users')
+        messageBox("ok", "Balance 업로드 완료", 0)
 
 
 # vid_writer.release()
@@ -399,17 +510,23 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                     i = messageBox("자세 측정 필요", "최초 자세 측정 데이터가 필요합니다.", 0)
                     break
 
-    # TODO: MAIN 버튼 클릭
     def mainBalance(self):
         self.groupBox.setTitle("            'S CAMERA")
         self.groupBox_ch.hide()  # challenge 가리기
         self.groupBox_us.hide()  # user 가리기
-        # game 가리기
         self.ImgWidget.show()
         self.btnCamera.show()
         self.btnCamera_2.hide()
 
-    # TODO: challengeBoard.json, users.json 연동 방법
+    # TODO: GAME 버튼 클릭
+    def game(self):
+        self.groupBox.setTitle("            'S GAME")
+        self.groupBox_ch.hide()  # challenge
+        self.groupBox_us.hide()  # user
+        self.btnCamera.hide()  # main
+        self.ImgWidget.show()
+        self.btnCamera_2.show()
+
     def challenge(self):
         self.groupBox.setTitle("            'S CHALLENGE BOARD")
         self.groupBox_ch.show()
@@ -417,7 +534,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.cameraOff()
         self.ImgWidget.hide()  # main 가리기
         self.btnCamera.hide()
-        # game 가리기
+        self.btnCamera_2.hide()  # game 가리기
         self.btnTurn.setEnabled(True)
 
         userData = readServerData('users')
@@ -440,15 +557,14 @@ class MainPage(QtWidgets.QMainWindow, form_4):
 
     # TODO: 내 차례 challenge 수행
     def myTurn(self):
-        if MainPage.chNum != -1: # 진행 중 챌린지 있음
+        if MainPage.chNum != -1:  # 진행 중 챌린지 있음
             self.btnTurn.setEnabled(True)
             # game 화면으로 이동, 이때 game화면에는 challenge 중임을 표시
             # 1 게임 종료 후, challenge 화면으로 돌아옴
             # 챌린지 참여 완료 표시
             # 참여 완료 후, self.btnTurn.setEnabled(False)
-        else: # 진행 중 챌린지 없음
+        else:  # 진행 중 챌린지 없음
             messageBox("챌린지 없음", "현재 참여 중인 챌린지가 없습니다.", 0)
-
 
     def challengeNum(self):  # 참여 중인 챌린지 번호 확인
         userdata = readServerData("users")
@@ -457,14 +573,13 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                 MainPage.chNum = userdata[u]['challengeNum']
                 break
 
-    # TODO: 다음 차례 challenge 수행할 user 선택
     def chooseNext(self):
         # 새 창을 띄움 - user목록 나열 // list or table 사용
         self.challengeNum()
         if MainPage.chNum == -1:
             messageBox("챌린지 없음", "현재 참여 중인 챌린지가 없습니다.", 0)
         else:
-            # if 챌린지 참여 완료 시
+            # TODO: if 챌린지 참여 완료 시
             self.dialog = nextDialog()
             self.dialog.show()
             # else:
@@ -476,8 +591,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         # 완료버튼을 누름으로써 challengeBoard.json에 새로운 챌린지 data 추가
         return 0
 
-    # TODO: USER 버튼 클릭
-    def userData(self):
+    def userData(self):  # USER 화면
         self.groupBox.setTitle("            'S DATA")
         self.groupBox_ch.hide()  # challenge 가리기
         self.groupBox_us.show()
@@ -499,32 +613,30 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                 graph = userData[u]['balance']
         self.Graph.plot(graph)  # widget을 class:PlotWidget, header: pyqtgraph로 하여 승격 후 graph그리기
 
-    # TODO: GAME 버튼 클릭
-    def game(self):
-        self.groupBox.setTitle("            'S GAME")
-        self.groupBox_ch.hide()
-        self.groupBox_us.hide()
-        self.btnCamera_2.show()
-
     def logout(self):
         self.close()
 
     def camera(self):  # main일때
         global running
-        if running:  # Camera OFF
+        if running:  # Camera OFF하기
             self.cameraOff()
-            # self.ImgWidget.hide()
-        else:  # Camera ON
-            # self.ImgWidget.show()
+        else:  # Camera ON하기
             MainPage.capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
             running = True
             MainPage.capture_thread.start()
         self.btnCamera.setEnabled(False)
         self.btnCamera.setText('Loading...')
 
-    def camera_2(self):  # game일때
-        # TODO: GAME에서 카메라 버튼을 눌렀을때 동작
+    def camera_2(self):  # TODO: GAME에서 카메라 동작
         global running
+        if running:
+            self.cameraOff()
+        else:
+            MainPage.capture_thread = threading.Thread(target=grabGame, args=(0, q, 1920, 1080, 30))
+            running = True
+            MainPage.capture_thread.start()
+        self.btnCamera_2.setEnabled(False)
+        self.btnCamera_2.setText('Loading...')
 
     def cameraOff(self):
         global running
@@ -605,9 +717,9 @@ class nextDialog(base_5, form_5):
             userData = readServerData('users')
             for u in userData:
                 if MainPage.userid == userData[u]['id']:
-                    userData[u]['challengeNum'] = -1 # 진행 중인 챌린지 없음으로 표시
+                    userData[u]['challengeNum'] = -1  # 진행 중인 챌린지 없음으로 표시
                 if nextUserid == userData[u]['id']:
-                    userData[u]['challengeNum'] = MainPage.chNum # 진행 중 챌린지 번호 표시
+                    userData[u]['challengeNum'] = MainPage.chNum  # 진행 중 챌린지 번호 표시
             upload(userData, 'users')
         messageBox("선택 완료", "다음 챌린저를 선택 완료했습니다.", 0)
         self.close()
