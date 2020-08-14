@@ -5,6 +5,7 @@ import queue
 import random
 import sys
 import threading
+import time
 import urllib.request
 from collections import OrderedDict
 from ftplib import FTP
@@ -219,111 +220,6 @@ if MODE is "COCO":
 net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
 
-def grabGame(cam, queue, width, height, fps):
-    apples = [] # 사과 좌표 생성
-    for i in range(5):
-        apples.append(random.randrange(20, 480))
-    before = len(apples)
-    now = len(apples)
-
-    global running
-    capture = cv2.VideoCapture(cam)
-    inWidth = 368
-    inHeight = 368
-    threshold = 0.1
-
-    apple = random.choice(apples)
-    while running and len(apples) > 0:
-        frame = {}
-        capture.grab()  # 재귀X: VideoCapture 내장 함수
-        retval, img = capture.retrieve(0)  # grab한 프레임을 decode하여 반환
-
-        imgCopy = np.copy(img)
-        if not retval:
-            cv2.waitKey()
-            break
-
-        imgWidth = img.shape[1]
-        imgHeight = img.shape[0]
-
-        inpBlob = cv2.dnn.blobFromImage(img, 1.0 / 255, (inWidth, inHeight), (0, 0, 0), swapRB=False, crop=False)
-        net.setInput(inpBlob)
-        output = net.forward()
-
-        H = output.shape[2]
-        W = output.shape[3]
-
-        # Empty list to store the detected keypoints
-        points = []
-
-        for i in range(nPoints):
-            # confidence map of corresponding body's part.
-            probMap = output[0, i, :, :]
-
-            # Find global maxima of the probMap.
-            minVal, prob, minLoc, point = cv2.minMaxLoc(probMap)
-
-            # Scale the point to fit on the original image
-            x = (imgWidth * point[0]) / W
-            y = (imgHeight * point[1]) / H
-
-            if prob > threshold:
-                cv2.circle(imgCopy, (int(x), int(y)), 8, (0, 255, 255), thickness=-1, lineType=cv2.FILLED)
-                cv2.putText(imgCopy, "{}".format(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2,
-                            lineType=cv2.LINE_AA)
-
-                # Add the point to the list if the probability is greater than the threshold
-                points.append((int(x), int(y)))
-            else:
-                points.append(None)
-
-        temp_a = 0  # Right
-        temp_b = 0  # left
-
-        # Draw Skeleton
-        for pair in POSE_PAIRS:
-            partA = pair[0]
-            partB = pair[1]
-            if points[partA] and points[partB]:
-                if (partA == 3 and partB == 4): #오른쪽 손목
-                    cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
-                    if partB == 4:
-                        cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-                        cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
-                        temp_a = points[partB]
-                        print(str(temp_a)) #오른족 손목 좌표 저장
-                if (partA == 6 or partB == 7): #왼쪽 손목
-                    cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
-                    if partB == 7:
-                        cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-                        cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
-                        temp_b = points[partB] #좌표 저장
-                        print(str(temp_b))
-
-                else:
-                    cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
-                    cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-                    cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-
-        # 사과 게임 테스트
-        # add apple
-        if before - 1 == now: # 한 개 줄면, 새로운 위치 생성
-            apple = random.choice(apples)
-            before = now
-        cv2.circle(img, (apple, 30), 10, (0, 0, 255), -1)
-        # TODO: handPoint 손목 좌표 -> temp_a: 오른쪽(실제 나의 몸 오른쪽) temp_b:왼쪽(실제 나의 몸 왼쪽) =카메라는 반대로 나옴옴
-       # if (apple-10 <= handPoint.x <= apple+10) and (20 <= handPoint.y <= 40) # user get apple
-        #   apples.remove(apple)
-        now = len(apples)
-
-        frame["img"] = img
-        if queue.qsize() < 10:
-            queue.put(frame)
-        else:
-            print(queue.qsize())
-
-
-
 # 스레드 돌아가는 함수
 def grab(cam, queue, width, height, fps):
     shoulderResult = []  # 어깨 측정 list
@@ -459,7 +355,6 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setupUi(self)
         self.setWindowTitle('MYFIT USER\'S PAGE')
-        # MainPage.capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
 
         # login한 user의 이름 표시
         MainPage.userid = loginPage.userid
@@ -479,6 +374,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.groupBox_ch.hide()
         self.groupBox_us.hide()
         self.btnCamera_2.hide()
+        self.groupBox_G.hide()
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
@@ -631,7 +527,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         if running:
             self.cameraOff()
         else:
-            MainPage.capture_thread = threading.Thread(target=grabGame, args=(0, q, 1920, 1080, 30))
+            MainPage.capture_thread = threading.Thread(target=self.grabGame, args=(0, q, 1920, 1080, 30))
             running = True
             MainPage.capture_thread.start()
         self.btnCamera_2.setEnabled(False)
@@ -647,8 +543,10 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             self.btnCamera.setEnabled(True)
             if running:
                 self.btnCamera.setText('ON')
+                self.btnCamera_2.setText('ON')
             else:
                 self.btnCamera.setText('CAMERA')
+                self.btnCamera_2.setText('START')
             frame = q.get()
             img = frame["img"]
 
@@ -670,6 +568,127 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def closeEvent(self, event):
         global running
         running = False
+
+    def grabGame(self, cam, queue, width, height, fps):
+        apples = []  # 사과 좌표 생성
+        for i in range(5):
+            apples.append(random.randrange(20, 480))
+        before = len(apples)
+        now = len(apples)
+
+        global running
+        capture = cv2.VideoCapture(cam)
+        inWidth = 368
+        inHeight = 368
+        threshold = 0.1
+
+        gameScore = 0
+        img = None
+        apple = random.choice(apples)
+        startTime = time.localtime()
+        startTime = startTime.tm_hour * 60 * 60 + startTime.tm_min * 60 + startTime.tm_sec
+        while running and len(apples) > 0:
+            frame = {}
+            capture.grab()  # 재귀X: VideoCapture 내장 함수
+            retval, img = capture.retrieve(0)  # grab한 프레임을 decode하여 반환
+
+            imgCopy = np.copy(img)
+            if not retval:
+                cv2.waitKey()
+                break
+
+            imgWidth = img.shape[1]
+            imgHeight = img.shape[0]
+
+            inpBlob = cv2.dnn.blobFromImage(img, 1.0 / 255, (inWidth, inHeight), (0, 0, 0), swapRB=False, crop=False)
+            net.setInput(inpBlob)
+            output = net.forward()
+
+            H = output.shape[2]
+            W = output.shape[3]
+
+            # Empty list to store the detected keypoints
+            points = []
+
+            for i in range(nPoints):
+                # confidence map of corresponding body's part.
+                probMap = output[0, i, :, :]
+
+                # Find global maxima of the probMap.
+                minVal, prob, minLoc, point = cv2.minMaxLoc(probMap)
+
+                # Scale the point to fit on the original image
+                x = (imgWidth * point[0]) / W
+                y = (imgHeight * point[1]) / H
+
+                if prob > threshold:
+                    cv2.circle(imgCopy, (int(x), int(y)), 8, (0, 255, 255), thickness=-1, lineType=cv2.FILLED)
+                    cv2.putText(imgCopy, "{}".format(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2,
+                                lineType=cv2.LINE_AA)
+
+                    # Add the point to the list if the probability is greater than the threshold
+                    points.append((int(x), int(y)))
+                else:
+                    points.append(None)
+
+            handA = None  # Right
+            handB = None  # left
+            # Draw Skeleton
+            for pair in POSE_PAIRS:
+                partA = pair[0]
+                partB = pair[1]
+                if points[partA] and points[partB]:
+                    if partA == 3 and partB == 4:  # 오른쪽 손목
+                        cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                        if partB == 4:
+                            cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                            cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
+                            handA = points[partB]
+                            print(str(handA))  # 오른족 손목 좌표 저장
+                    if partA == 6 or partB == 7:  # 왼쪽 손목
+                        cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                        if partB == 7:
+                            cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                            cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
+                            handB = points[partB]  # 좌표 저장
+                            print(str(handB))
+                    else:
+                        cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                        cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                        cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+
+            # 사과 게임 테스트
+            if before - 1 == now:  # 한 개 줄면, 새로운 위치 생성
+                apple = random.choice(apples)
+                before = now
+            cv2.circle(img, (apple, 100), 14, (0, 0, 255), -1)
+            # handA: 오른쪽(실제 나의 몸 오른쪽) handB:왼쪽(실제 나의 몸 왼쪽) =카메라는 반대로 나옴옴
+            if handA is not None:
+                if (apple - 30 <= handA[0] <= apple + 30) and (75 <= handA[1] <= 125):
+                    apples.remove(apple)
+                    gameScore += 1
+            if handB is not None:
+                if (apple - 30 <= handB[0] <= apple + 30) and (75 <= handB[1] <= 125):
+                    apples.remove(apple)
+                    gameScore += 1
+            now = len(apples)
+
+            frame["img"] = img
+            if queue.qsize() < 10:
+                queue.put(frame)
+            else:
+                print(queue.qsize())
+
+            now = time.localtime()
+            now = now.tm_hour * 60 * 60 + now.tm_min * 60 + now.tm_sec
+            if abs(now - startTime) >= 5:  # TODO: 60초로 바꾸기
+                self.lblEnd.setText("TIME OUT")
+                break
+
+        # challengeMode라면 challengeMode를 체크
+        self.groupBox_G.show()
+        self.lblId.setText(MainPage.userid)
+        # self.lcdNumber.intValue = 6 # TODO: 점수 적용
 
 
 class nextDialog(base_5, form_5):

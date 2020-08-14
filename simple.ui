@@ -221,7 +221,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>CAMERA</string>
+      <string>START</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="groupBox_us">
@@ -336,6 +336,170 @@
         <height>371</height>
        </rect>
       </property>
+      <zorder>groupBox_G</zorder>
+      <zorder>groupBox_G</zorder>
+      <zorder>groupBox_G</zorder>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_G">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>185</y>
+       <width>631</width>
+       <height>381</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);
+border-color: rgb(108, 108, 108)</string>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+     <widget class="QPushButton" name="btnOk">
+      <property name="geometry">
+       <rect>
+        <x>492</x>
+        <y>310</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe 명조 Std M</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(225, 225, 225)</string>
+      </property>
+      <property name="text">
+       <string>OK</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="lcdNumber">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>170</y>
+        <width>151</width>
+        <height>61</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblApple">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>120</y>
+        <width>161</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe 명조 Std M</family>
+        <pointsize>20</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>APPLE</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblEnd">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>20</y>
+        <width>251</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe 명조 Std M</family>
+        <pointsize>25</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>GAME END</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblUser">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>120</y>
+        <width>161</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe 명조 Std M</family>
+        <pointsize>20</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>USER</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="challengemode">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>300</y>
+        <width>311</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe Ming Std L</family>
+        <pointsize>16</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>CHALLENGE MODE</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblId">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>170</y>
+        <width>211</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe Ming Std L</family>
+        <pointsize>18</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+        <underline>true</underline>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-color: rgb(170, 170, 170);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
      </widget>
     </widget>
     <zorder>ImgWidget</zorder>
@@ -349,6 +513,7 @@
     <zorder>groupBox_ch</zorder>
     <zorder>btnCamera_2</zorder>
     <zorder>groupBox_us</zorder>
+    <zorder>groupBox_G</zorder>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
