@@ -35,6 +35,9 @@ form_4, base_4 = uic.loadUiType(uifile_4)
 uifile_5 = 'turn2.ui'  # next
 form_5, base_5 = uic.loadUiType(uifile_5)
 
+uifile_6 = 'new.ui'  # new
+form_6, base_6 = uic.loadUiType(uifile_6)
+
 
 class Start(base_1, form_1):
     def __init__(self):
@@ -161,16 +164,15 @@ class SignPage(base_3, form_3):
                     count = 1
                     messageBox("경고", "ID 중복", 0)
             if count == 0:
-                userNum = 'user' + str(len(users))
-                users.setdefault('t', {})  # key 값에 변수로는 왜 바로 안되는지 모르겠네
-                users['t']['id'] = userid
-                users['t']['pw'] = userpw
-                users['t']['name'] = username
-                users['t']['age'] = self.spinBox.value()
-                users['t']['balance'] = []  # default
-                users['t']['challengeNum'] = -1  # default
-                users[userNum] = users.pop('t')  # user 번호 설정
-
+                userNum = str(len(users))
+                users.setdefault(userNum, {})  # key 값에 변수로는 왜 바로 안되는지 모르겠네
+                users[userNum]['id'] = userid
+                users[userNum]['pw'] = userpw
+                users[userNum]['name'] = username
+                users[userNum]['age'] = self.spinBox.value()
+                users[userNum]['balance'] = []  # default
+                users[userNum]['challengeNum'] = -1  # default
+                users[userNum]['challengeF'] = False  # default
                 upload(users, "users")  # 서버에 새로운 회원 정보 업로드
                 i = messageBox("가입완료", "회원가입이 완료되었습니다.", 0)
                 if i == 1:
@@ -343,6 +345,36 @@ class OwnImageWidget(QtWidgets.QWidget):
         qp.end()
 
 
+class newChDialog(base_6, form_6):
+    def __init__(self):
+        super(base_6, self).__init__()
+        self.setupUi(self)
+        self.setWindowTitle('CREATE NEW')
+        self.btnCreate.clicked.connect(self.create)
+        self.btnCancel.clicked.connect(self.cancel)
+
+    def create(self):
+        chBoard = readServerData('challengeBoard')
+        chNum = str(len(chBoard))
+
+        users = readServerData('users')
+        i = -1
+        for u in users:
+            if users[u]['id'] == MainPage.userid and users[u]['challengeNum'] == -1:
+                users[u]['challengeNum'] = chNum
+                chBoard.setdefault(chNum, {})
+                chBoard[chNum]['challengers'] = [MainPage.userid]
+                upload(chBoard, "challengeBoard")  # 서버에 업로드
+                upload(users, "users")  # 유저 정보에 업로드
+                i = messageBox("챌린지 생성", "새로운 챌린지가 생성되었습니다.", 0)
+                if i == 1:
+                    self.close()
+        messageBox("챌린지 생성 실패", "이미 참여 중인 챌린지가 있습니다.", 0)
+
+    def cancel(self):
+        self.close()
+
+
 class MainPage(QtWidgets.QMainWindow, form_4):
     userid = ''
     username = ''
@@ -371,10 +403,12 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.btnNew.clicked.connect(self.newCh)
         self.btnUser.clicked.connect(self.userData)
         self.btnLogout.clicked.connect(self.logout)
+        self.btnOk.clicked.connect(self.ok)
         self.groupBox_ch.hide()
         self.groupBox_us.hide()
         self.btnCamera_2.hide()
         self.groupBox_G.hide()
+        self.lblChMode.hide()
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
@@ -408,19 +442,21 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     def mainBalance(self):
         self.groupBox.setTitle("            'S CAMERA")
         self.groupBox_ch.hide()  # challenge 가리기
+        self.lblChMode.hide()
         self.groupBox_us.hide()  # user 가리기
         self.ImgWidget.show()
         self.btnCamera.show()
-        self.btnCamera_2.hide()
+        self.btnCamera_2.hide() # game 가리기
 
-    # TODO: GAME 버튼 클릭
     def game(self):
         self.groupBox.setTitle("            'S GAME")
         self.groupBox_ch.hide()  # challenge
+        self.lblChMode.hide()
         self.groupBox_us.hide()  # user
         self.btnCamera.hide()  # main
-        self.ImgWidget.show()
+        self.ImgWidget.show()  # game
         self.btnCamera_2.show()
+        self.btnCamera_2.setEnabled(True)
 
     def challenge(self):
         self.groupBox.setTitle("            'S CHALLENGE BOARD")
@@ -430,8 +466,13 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.ImgWidget.hide()  # main 가리기
         self.btnCamera.hide()
         self.btnCamera_2.hide()  # game 가리기
+        self.lblChMode.hide()
+        self.groupBox_G.hide()
         self.btnTurn.setEnabled(True)
 
+        self.loadChallengeBoard()
+
+    def loadChallengeBoard(self):
         userData = readServerData('users')
         for u in userData:
             if MainPage.userid == userData[u]['id']:
@@ -450,14 +491,27 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             self.listView.setModel(model)
         self.challengeNum()
 
+    challengeNow = False
+
     # TODO: 내 차례 challenge 수행
     def myTurn(self):
+        users = readServerData('users')
+        for u in users:
+            if users[u]['id'] == MainPage.userid:
+                chBool = users[u]['challengeF']
+                break
         if MainPage.chNum != -1:  # 진행 중 챌린지 있음
-            self.btnTurn.setEnabled(True)
-            # game 화면으로 이동, 이때 game화면에는 challenge 중임을 표시
-            # 1 게임 종료 후, challenge 화면으로 돌아옴
-            # 챌린지 참여 완료 표시
-            # 참여 완료 후, self.btnTurn.setEnabled(False)
+            if chBool is True:
+                messageBox("챌린지 진행 완료", "이미 현재 챌린지 게임을 수행했습니다. 다음 챌린저를 선택하세요.", 0)
+            else:
+                self.btnTurn.setEnabled(True)
+                MainPage.challengeNow = True  # 참여 중 표시
+                MainPage.capture_thread = threading.Thread(target=self.grabGame, args=(0, q, 1920, 1080, 30))
+                self.lblChMode.show()  # game화면에는 challenge 중임을 표시
+                self.ImgWidget.show()
+                self.btnCamera_2.show()
+                self.groupBox_ch.hide()
+                self.btnTurn.setEnabled(False)
         else:  # 진행 중 챌린지 없음
             messageBox("챌린지 없음", "현재 참여 중인 챌린지가 없습니다.", 0)
 
@@ -469,31 +523,34 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                 break
 
     def chooseNext(self):
-        # 새 창을 띄움 - user목록 나열 // list or table 사용
         self.challengeNum()
         if MainPage.chNum == -1:
             messageBox("챌린지 없음", "현재 참여 중인 챌린지가 없습니다.", 0)
         else:
-            # TODO: if 챌린지 참여 완료 시
-            self.dialog = nextDialog()
-            self.dialog.show()
-            # else:
-            #     messageBox("챌린지 오류", "진행하지 않은 챌린지가 있습니다.", 0)
+            users = readServerData('users')
+            for u in users:
+                if users[u]['id'] == MainPage.userid:
+                    if users[u]['challengeF']:
+                        self.dialog = nextDialog()
+                        self.dialog.show()
+                    else:
+                        messageBox("챌린지 오류", "진행하지 않은 챌린지가 있습니다.", 0)
+                    break
 
-    # TODO: 새로운 challenge 생성
     def newCh(self):
-        # 새 창을 띄움 - 챌린지 인원, 게임 선택(어차피 하나지만ㅎ)
-        # 완료버튼을 누름으로써 challengeBoard.json에 새로운 챌린지 data 추가
-        return 0
+        self.dialog = newChDialog()
+        self.dialog.show()
 
     def userData(self):  # USER 화면
         self.groupBox.setTitle("            'S DATA")
         self.groupBox_ch.hide()  # challenge 가리기
+        self.lblChMode.hide()
         self.groupBox_us.show()
-        # game 가리기
         self.cameraOff()
         self.ImgWidget.hide()  # main 가리기
         self.btnCamera.hide()
+        self.groupBox_G.hide()  # game 가리기
+        self.btnCamera_2.hide()
         self.btnId_input.setText(MainPage.userid)
         self.btnName_input.setText(MainPage.username)
         userData = readServerData('users')
@@ -522,7 +579,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.btnCamera.setEnabled(False)
         self.btnCamera.setText('Loading...')
 
-    def camera_2(self):  # TODO: GAME에서 카메라 동작
+    def camera_2(self):
         global running
         if running:
             self.cameraOff()
@@ -570,6 +627,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         running = False
 
     def grabGame(self, cam, queue, width, height, fps):
+        self.challengeMode.setChecked(False)
         apples = []  # 사과 좌표 생성
         for i in range(5):
             apples.append(random.randrange(20, 480))
@@ -688,7 +746,27 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         # challengeMode라면 challengeMode를 체크
         self.groupBox_G.show()
         self.lblId.setText(MainPage.userid)
-        # self.lcdNumber.intValue = 6 # TODO: 점수 적용
+        self.lblScore.setText(str(gameScore))
+        if MainPage.challengeNow is True:
+            self.challengeMode.setChecked(True)  # 챌린지 참여 중을 사용자에게 표시
+
+    def ok(self):
+        if MainPage.challengeNow is True:  # 챌린지 수행 중인 경우
+            MainPage.challengeNow = False  # 챌린지 완료 => 진행 종료
+            self.btnTurn.setEnabled(True)
+            users = readServerData('users')
+            for u in users:
+                if users[u]['id'] == MainPage.userid:
+                    users[u]['challengeF'] = True  # 챌린지 참여 완료 표시
+                    upload(users, 'users')
+                    break
+            i = messageBox('챌린지 완료', '챌린지를 수행했습니다. 다음 챌린저를 선택을 위해 CHALLENGE로 이동합니다.', 0)
+            if i == 1:
+                self.challenge()
+        else:
+            i = messageBox('게임 종료', '게임이 종료되었습니다. USER로 이동하시겠습니까?', 1)
+            if i == 1:
+                self.userData()
 
 
 class nextDialog(base_5, form_5):
@@ -736,6 +814,7 @@ class nextDialog(base_5, form_5):
             for u in userData:
                 if MainPage.userid == userData[u]['id']:
                     userData[u]['challengeNum'] = -1  # 진행 중인 챌린지 없음으로 표시
+                    userData[u]['challengeF'] = False
                 if nextUserid == userData[u]['id']:
                     userData[u]['challengeNum'] = MainPage.chNum  # 진행 중 챌린지 번호 표시
             upload(userData, 'users')
