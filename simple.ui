@@ -336,9 +336,6 @@
         <height>371</height>
        </rect>
       </property>
-      <zorder>groupBox_G</zorder>
-      <zorder>groupBox_G</zorder>
-      <zorder>groupBox_G</zorder>
      </widget>
     </widget>
     <widget class="QGroupBox" name="groupBox_G">
@@ -357,38 +354,6 @@ border-color: rgb(108, 108, 108)</string>
      <property name="title">
       <string/>
      </property>
-     <widget class="QPushButton" name="btnOk">
-      <property name="geometry">
-       <rect>
-        <x>492</x>
-        <y>310</y>
-        <width>101</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>Adobe 명조 Std M</family>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(225, 225, 225)</string>
-      </property>
-      <property name="text">
-       <string>OK</string>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="lcdNumber">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>170</y>
-        <width>151</width>
-        <height>61</height>
-       </rect>
-      </property>
-     </widget>
      <widget class="QLabel" name="lblApple">
       <property name="geometry">
        <rect>
@@ -455,11 +420,11 @@ border-color: rgb(108, 108, 108)</string>
        <string>USER</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="challengemode">
+     <widget class="QCheckBox" name="challengeMode">
       <property name="geometry">
        <rect>
-        <x>50</x>
-        <y>300</y>
+        <x>70</x>
+        <y>270</y>
         <width>311</width>
         <height>61</height>
        </rect>
@@ -501,6 +466,79 @@ border-color: rgb(108, 108, 108)</string>
        <string/>
       </property>
      </widget>
+     <widget class="QLabel" name="lblScore">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>170</y>
+        <width>171</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe Ming Std L</family>
+        <pointsize>18</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+        <underline>true</underline>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-color: rgb(170, 170, 170);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btnOk">
+      <property name="geometry">
+       <rect>
+        <x>490</x>
+        <y>310</y>
+        <width>91</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe 명조 Std M</family>
+        <pointsize>11</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(225, 225, 225);</string>
+      </property>
+      <property name="text">
+       <string>OK</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="lblChMode">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>55</y>
+       <width>221</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 0, 0);</string>
+     </property>
+     <property name="text">
+      <string>CHALLENGE MODE</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
     </widget>
     <zorder>ImgWidget</zorder>
     <zorder>btnCamera</zorder>
@@ -514,6 +552,7 @@ border-color: rgb(108, 108, 108)</string>
     <zorder>btnCamera_2</zorder>
     <zorder>groupBox_us</zorder>
     <zorder>groupBox_G</zorder>
+    <zorder>lblChMode</zorder>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
