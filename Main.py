@@ -277,34 +277,33 @@ def grabGame(cam, queue, width, height, fps):
             else:
                 points.append(None)
 
-        # temp_a = 0  # Right shoulder
-        # temp_b = 0  # left shoulder
-        # temp = 0
-        # temp2 = 0
+        temp_a = 0  # Right
+        temp_b = 0  # left
 
         # Draw Skeleton
-        # for pair in POSE_PAIRS:
-        #     partA = pair[0]
-        #     partB = pair[1]
-        #
-        #     if points[partA] and points[partB]:
-        #         if (partA == 1 and partB == 2) or (
-        #                 partA == 1 and partB == 5):  # Neck-Right Shoulder, Neck-left Shoulder일 경우
-        #             cv2.line(img, points[partA], points[partB], (255, 0, 0), 3, lineType=cv2.LINE_AA)  # 다른 색으로 표시
-        #             cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-        #             cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-        #             if partB == 2:  # Right Shoulder인 경우 좌표 저장
-        #                 temp_a = points[partB]
-        #             if partB == 5 and temp_a != 0:  # left Shoulder인 경우 좌표 저장
-        #                 temp_b = points[partB]
-        #                 temp = temp_a[0] - temp_b[0]  # 기울기 구하기 위하여 x증가량
-        #                 temp2 = temp_a[1] - temp_b[1]  # 기울기 구하기 위하여 y증가량
-        #                 shoulderResult.append(abs(temp2) / abs(temp))  # 절대값을 이용하여 기울기를 구한 후 list에 저장
-        #
-        #         else:
-        #             cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
-        #             cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-        #             cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+        for pair in POSE_PAIRS:
+            partA = pair[0]
+            partB = pair[1]
+            if points[partA] and points[partB]:
+                if (partA == 3 and partB == 4): #오른쪽 손목
+                    cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                    if partB == 4:
+                        cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                        cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
+                        temp_a = points[partB]
+                        print(str(temp_a)) #오른족 손목 좌표 저장
+                if (partA == 6 or partB == 7): #왼쪽 손목
+                    cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                    if partB == 7:
+                        cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                        cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
+                        temp_b = points[partB] #좌표 저장
+                        print(str(temp_b))
+
+                else:
+                    cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                    cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                    cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
 
         # 사과 게임 테스트
         # add apple
@@ -312,8 +311,8 @@ def grabGame(cam, queue, width, height, fps):
             apple = random.choice(apples)
             before = now
         cv2.circle(img, (apple, 30), 10, (0, 0, 255), -1)
-        # TODO: handPoint 손목 좌표
-        # if (apple-10 <= handPoint.x <= apple+10) and (20 <= handPoint.y <= 40) # user get apple
+        # TODO: handPoint 손목 좌표 -> temp_a: 오른쪽(실제 나의 몸 오른쪽) temp_b:왼쪽(실제 나의 몸 왼쪽) =카메라는 반대로 나옴옴
+       # if (apple-10 <= handPoint.x <= apple+10) and (20 <= handPoint.y <= 40) # user get apple
         #   apples.remove(apple)
         now = len(apples)
 
