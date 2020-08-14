@@ -566,6 +566,8 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         self.Graph.plot(graph)  # widget을 class:PlotWidget, header: pyqtgraph로 하여 승격 후 graph그리기
 
     def logout(self):
+        self.window = Start() #시작화면으로
+        self.window.show()
         self.close()
 
     def camera(self):  # main일때
