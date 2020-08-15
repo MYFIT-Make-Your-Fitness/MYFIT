@@ -299,11 +299,10 @@ def grab(cam, queue, width, height, fps):
                         temp = temp_a[0] - temp_b[0]  # 기울기 구하기 위하여 x증가량
                         temp2 = temp_a[1] - temp_b[1]  # 기울기 구하기 위하여 y증가량
                         shoulderResult.append(abs(temp2) / abs(temp))  # 절대값을 이용하여 기울기를 구한 후 list에 저장
-
-                else:
-                    cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
-                    cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-                    cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                # else: 어깨만 선 나타나도록 수정
+                #     cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                #     cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                #     cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
         # vid_writer.write(frame)
 
         frame["img"] = img
@@ -701,23 +700,23 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                 partB = pair[1]
                 if points[partA] and points[partB]:
                     if partA == 3 and partB == 4:  # 오른쪽 손목
-                        cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                        cv2.line(img, points[partA], points[partB], (250, 255, 255), 3, lineType=cv2.LINE_AA)
                         if partB == 4:
-                            cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                            cv2.circle(img, points[partA], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
                             cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
                             handA = points[partB]
                             print(str(handA))  # 오른족 손목 좌표 저장
                     if partA == 6 or partB == 7:  # 왼쪽 손목
-                        cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
+                        cv2.line(img, points[partA], points[partB], (250, 255, 255), 3, lineType=cv2.LINE_AA)
                         if partB == 7:
-                            cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                            cv2.circle(img, points[partA], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
                             cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
                             handB = points[partB]  # 좌표 저장
                             print(str(handB))
                     else:
-                        cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
-                        cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-                        cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                        cv2.line(img, points[partA], points[partB], (250, 255, 255), 3, lineType=cv2.LINE_AA)
+                        cv2.circle(img, points[partA], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
+                        cv2.circle(img, points[partB], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
 
             # 사과 게임 테스트
             if before - 1 == now:  # 한 개 줄면, 새로운 위치 생성
