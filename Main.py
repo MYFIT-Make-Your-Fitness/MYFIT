@@ -14,10 +14,8 @@ from io import BytesIO
 import cv2
 import numpy as np
 from PyQt5 import QtCore, uic, QtWidgets, QtGui
-from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from pyqtgraph import PlotWidget, plot  # 그래프 그리기 위해서
 
 # load both ui file
 uifile_1 = 'Start.ui'  # start
@@ -201,7 +199,6 @@ def readServerData(fileName):
 
 # Main Page - Camera
 running = False
-# capture_thread = None
 q = queue.Queue()
 
 MODE = "COCO"
@@ -211,14 +208,6 @@ if MODE is "COCO":
     nPoints = 18
     POSE_PAIRS = [[1, 0], [1, 2], [1, 5], [2, 3], [3, 4], [5, 6], [6, 7], [1, 8], [8, 9], [9, 10], [1, 11], [11, 12],
                   [12, 13], [0, 14], [0, 15], [14, 16], [15, 17]]
-# elif MODE is "MPI":
-#     protoFile = "pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
-#     weightsFile = "pose/mpi/pose_iter_160000.caffemodel"
-#     nPoints = 15
-#     POSE_PAIRS = [[0, 1], [1, 2], [2, 3], [3, 4], [1, 5], [5, 6], [6, 7], [1, 14], [14, 8], [8, 9], [9, 10], [14, 11],
-#                   [11, 12], [12, 13]]
-# vid_writer = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
-# (frame.shape[1], frame.shape[0]))
 net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
 
@@ -299,11 +288,6 @@ def grab(cam, queue, width, height, fps):
                         temp = temp_a[0] - temp_b[0]  # 기울기 구하기 위하여 x증가량
                         temp2 = temp_a[1] - temp_b[1]  # 기울기 구하기 위하여 y증가량
                         shoulderResult.append(abs(temp2) / abs(temp))  # 절대값을 이용하여 기울기를 구한 후 list에 저장
-                # else: 어깨만 선 나타나도록 수정
-                #     cv2.line(img, points[partA], points[partB], (0, 255, 255), 3, lineType=cv2.LINE_AA)
-                #     cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-                #     cv2.circle(img, points[partB], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-        # vid_writer.write(frame)
 
         frame["img"] = img
         if queue.qsize() < 10:
@@ -322,8 +306,6 @@ def grab(cam, queue, width, height, fps):
         upload(users, 'users')
         messageBox("ok", "Balance 업로드 완료", 0)
 
-
-# vid_writer.release()
 
 class OwnImageWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -392,6 +374,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
     capture_thread = None
     chNum = -1
     chturnclose = False
+    challengeNow = False
 
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -499,9 +482,6 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             self.listView.setModel(model)
         challengeNumCount()
 
-    challengeNow = False
-
-    # TODO: 내 차례 challenge 수행
     def myTurn(self):
         users = readServerData('users')
         for u in users:
@@ -515,7 +495,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                 self.btnTurn.setEnabled(True)
                 MainPage.challengeNow = True  # 참여 중 표시
                 MainPage.capture_thread = threading.Thread(target=self.grabGame, args=(0, q, 1920, 1080, 30))
-                self.lblChMode.show()  # game화면에는 challenge 중임을 표시
+                self.lblChMode.show()  # game 화면에는 challenge 중임을 표시
                 self.ImgWidget.show()
                 self.btnCamera_2.show()
                 self.groupBox_ch.hide()
@@ -587,9 +567,11 @@ class MainPage(QtWidgets.QMainWindow, form_4):
         if running:
             self.cameraOff()
         else:
+            self.groupBox_G.hide()
             MainPage.capture_thread = threading.Thread(target=self.grabGame, args=(0, q, 1920, 1080, 30))
             running = True
             MainPage.capture_thread.start()
+
         self.btnCamera_2.setEnabled(False)
         self.btnCamera_2.setText('Loading...')
 
@@ -645,7 +627,7 @@ class MainPage(QtWidgets.QMainWindow, form_4):
 
         gameScore = 0
         img = None
-        apple = random.choice(apples)
+        apple = apples[0]
         startTime = time.localtime()
         startTime = startTime.tm_hour * 60 * 60 + startTime.tm_min * 60 + startTime.tm_sec
         while running and len(apples) > 0:
@@ -686,7 +668,6 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                     cv2.circle(imgCopy, (int(x), int(y)), 8, (0, 255, 255), thickness=-1, lineType=cv2.FILLED)
                     cv2.putText(imgCopy, "{}".format(i), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2,
                                 lineType=cv2.LINE_AA)
-
                     # Add the point to the list if the probability is greater than the threshold
                     points.append((int(x), int(y)))
                 else:
@@ -718,20 +699,19 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                         cv2.circle(img, points[partA], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
                         cv2.circle(img, points[partB], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
 
-            # 사과 게임 테스트
-            if before - 1 == now:  # 한 개 줄면, 새로운 위치 생성
-                apple = random.choice(apples)
-                before = now
+            # 스트레칭 게임
             cv2.circle(img, (apple, 100), 14, (0, 0, 255), -1)
             # handA: 오른쪽(실제 나의 몸 오른쪽) handB:왼쪽(실제 나의 몸 왼쪽) =카메라는 반대로 나옴옴
             if handA is not None:
-                if (apple - 30 <= handA[0] <= apple + 30) and (75 <= handA[1] <= 125):
-                    apples.remove(apple)
-                    gameScore += 1
+                if (apple - 40 <= handA[0] <= apple + 40) and (60 <= handA[1] <= 140):
+                    if apple in apples:
+                        apples.remove(apple)
+                        gameScore += 1
             if handB is not None:
-                if (apple - 30 <= handB[0] <= apple + 30) and (75 <= handB[1] <= 125):
-                    apples.remove(apple)
-                    gameScore += 1
+                if (apple - 40 <= handB[0] <= apple + 40) and (60 <= handB[1] <= 140):
+                    if apple in apples:
+                        apples.remove(apple)
+                        gameScore += 1
             now = len(apples)
 
             frame["img"] = img
@@ -740,20 +720,26 @@ class MainPage(QtWidgets.QMainWindow, form_4):
             else:
                 print(queue.qsize())
 
+            if before - 1 == now:  # 사과 새로운 위치 생성
+                apple = apples[0]
+                before = now
+
+            # 게임 타이머
             now = time.localtime()
             now = now.tm_hour * 60 * 60 + now.tm_min * 60 + now.tm_sec
-            if abs(now - startTime) >= 5:  # TODO: 60초로 바꾸기
+            if abs(now - startTime) >= 60:
                 self.lblEnd.setText("TIME OUT")
                 break
 
-        # challengeMode라면 challengeMode를 체크
         self.groupBox_G.show()
         self.lblId.setText(MainPage.userid)
         self.lblScore.setText(str(gameScore))
         if MainPage.challengeNow is True:
-            self.challengeMode.setChecked(True)  # 챌린지 참여 중을 사용자에게 표시
+            self.challengeMode.setChecked(True)  #  challengeMode라면 challengeMode를 체크
 
     def ok(self):
+        self.btnCamera_2.setEnabled(True)
+        self.btnCamera_2.setText("START")
         if MainPage.challengeNow is True:  # 챌린지 수행 중인 경우
             MainPage.challengeNow = False  # 챌린지 완료 => 진행 종료
             self.btnTurn.setEnabled(True)
@@ -839,12 +825,6 @@ def messageBox(title, text, style):
     # 4: 예(6), 아니오(7)
     # 5: 다시시도(4), 취소(2)
     # 6: 취소(2), 다시시도(10), 계속(11)
-
-
-# 로그인 정보 저장 파일 삭제 함수
-def removeLogfile(file):
-    if os.path.isfile(file):
-        os.remove(file)
 
 
 if __name__ == '__main__':
