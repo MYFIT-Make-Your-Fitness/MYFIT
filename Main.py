@@ -685,15 +685,13 @@ class MainPage(QtWidgets.QMainWindow, form_4):
                         if partB == 4:
                             cv2.circle(img, points[partA], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
                             cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
-                            handA = points[partB]
-                            print(str(handA))  # 오른족 손목 좌표 저장
+                            handA = points[partB] # 손목 좌표 저장
                     if partA == 6 or partB == 7:  # 왼쪽 손목
                         cv2.line(img, points[partA], points[partB], (250, 255, 255), 3, lineType=cv2.LINE_AA)
                         if partB == 7:
                             cv2.circle(img, points[partA], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
                             cv2.circle(img, points[partB], 8, (255, 0, 0), thickness=-1, lineType=cv2.FILLED)
-                            handB = points[partB]  # 좌표 저장
-                            print(str(handB))
+                            handB = points[partB]  # 손목 좌표 저장
                     else:
                         cv2.line(img, points[partA], points[partB], (250, 255, 255), 3, lineType=cv2.LINE_AA)
                         cv2.circle(img, points[partA], 8, (0, 0, 0), thickness=-1, lineType=cv2.FILLED)
