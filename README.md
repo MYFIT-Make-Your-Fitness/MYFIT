@@ -15,7 +15,7 @@ Most modern people in today's world have to work long hours in the same posture 
 ## Environment
 - Language & Technique
   - Code: Python/ openCV
-  - GUI: PyQt5
+  - GUI: PyQt5/ pyqtgraph
   - DB: Json
   - Trained Model: OpenPose
   
