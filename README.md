@@ -1,6 +1,6 @@
 # BOTTOM-UP Project
 
-# MYFIT
+## MYFIT
 Make Your Fitness
 
 ## Team
