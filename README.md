@@ -13,12 +13,12 @@ Most modern people in today's world have to work long hours in the same posture 
 <img src="POSTER.png" title="MYFIT POSTER" alt="MYFIT POSTER"></img>
 
 ## Environment
-＊ Language & Technique
+- Language & Technique
   - Code: Python/ openCV
   - GUI: PyQt5
   - DB: Json
   - Trained Model: OpenPose
   
-＊Trained Model
-  - Deep learning based human pose estimation using opencv (cpp/python)</br>
+- Trained Model
+  - "pose_iter_440000.caffemodel" from Deep learning based human pose estimation using opencv (cpp/python)</br>
   : <https://www.learnopencv.com/deep-learning-based-human-pose-estimation-using-opencv-cpp-python/>
