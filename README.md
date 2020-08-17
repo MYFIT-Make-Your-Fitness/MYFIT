@@ -10,9 +10,7 @@ Make Your Fitness
 ## Introduce
 Most modern people in today's world have to work long hours in the same posture for long periods of time. In particular, office workers who work at their desks often suffer from pain, such as frequent cramps in certain body parts like shoulders. So, we wanted to help users relieve their physical fatigue by having them check their physical balance and stretch through our programs.
 
-
-## Settings
-
+<img src="POSTER.png" width="450px" height="300px" title="MYFIT POSTER" alt="MYFIT POSTER"></img>
 
 ## Environment
 ＊ Language & Technique
