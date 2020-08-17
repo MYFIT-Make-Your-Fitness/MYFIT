@@ -1,5 +1,5 @@
-# BOTTOM-UP Project
-MYFIT - Make Your Fitness
+# MYFIT
+Make Your Fitness
 
 ## Team
 보라색치즈퐁듀
@@ -8,3 +8,19 @@ MYFIT - Make Your Fitness
 201802094 박소희
 
 ## Introduce
+Most modern people in today's world have to work long hours in the same posture for long periods of time. In particular, office workers who work at their desks often suffer from pain, such as frequent cramps in certain body parts like shoulders. So, we wanted to help users relieve their physical fatigue by having them check their physical balance and stretch through our programs.
+
+
+## Settings
+
+
+## Environment
+＊ Language & Technique
+  - Code: Python/ openCV
+  - GUI: PyQt5
+  - DB: Json
+  - Trained Model: OpenPose
+  
+＊Trained Model
+  - Deep learning based human pose estimation using opencv (cpp/python)
+  : <https://www.learnopencv.com/deep-learning-based-human-pose-estimation-using-opencv-cpp-python/>
