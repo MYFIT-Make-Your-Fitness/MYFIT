@@ -1,7 +1,5 @@
 # BOTTOM-UP Project
-
-## MYFIT
-Make Your Fitness
+MYFIT - Make Your Fitness
 
 ## Team
 보라색치즈퐁듀
