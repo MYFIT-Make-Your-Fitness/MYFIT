@@ -2,7 +2,7 @@
 Make Your Fitness
 
 ## Team
-### PurpleCheeseFondue - 보라색치즈퐁듀
+### 보라색치즈퐁듀
 201502074 오경택</br>
 201802066 김소영</br>
 201802094 박소희</br>
