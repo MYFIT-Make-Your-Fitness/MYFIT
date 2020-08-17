@@ -20,6 +20,6 @@ Most modern people in today's world have to work long hours in the same posture 
   - Trained Model: OpenPose
   
 - Trained Model
-  - "pose_iter_440000.caffemodel" 
+  - "pose_iter_440000.caffemodel" </br>
       from Deep learning based human pose estimation using opencv (cpp/python)</br>
   : <https://www.learnopencv.com/deep-learning-based-human-pose-estimation-using-opencv-cpp-python/>
