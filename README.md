@@ -28,7 +28,7 @@ Code: Python/ openCV
 GUI: PyQt5/ pyqtgraph
 DataBase: Json
 Server: GCP
-Trained Model: OpenPose API
+Model: Trained Model
  ```
  
 |      Code      |      GUI      |    Database   |      etc      |
